@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   Trophy,
+  Heart,
   ArrowRight,
   CalendarRange,
 } from "lucide-react";
@@ -48,6 +49,7 @@ const ROUTE_MAP = {
   "meeting-cost-analytics": "/meeting-cost-analytics",
   leaderboard: "/leaderboard",
   "meeting-series": "/meeting-series",
+  "meeting-wellness": "/meeting-wellness",
 };
 
 /* ─── Dashboard ───────────────────────────────────────────────────────────── */
@@ -194,6 +196,20 @@ const Dashboard = () => {
         "bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-100 dark:border-yellow-800",
       accentRing:
         "group-hover:ring-yellow-100 dark:group-hover:ring-yellow-900/40",
+    },
+    {
+      id: "meeting-wellness",
+      icon: Heart,
+      title: "Meeting Wellness Dashboard",
+      description:
+        "Monitor meeting load, burnout risk, focus time protection, and team wellness.",
+      iconBg: "bg-red-50 dark:bg-red-900/30",
+      iconColor: "text-red-600 dark:text-red-400",
+      tag: "Wellness",
+      tagColor:
+        "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-100 dark:border-red-800",
+      accentRing:
+        "group-hover:ring-red-100 dark:group-hover:ring-red-900/40",
     },
   ];
 

@@ -259,4 +259,7 @@ router.use("/api/team-availability", teamAvailabilityRoutes);
 import actionItemTemplateRoutes from "./actionItemTemplateRoutes.js";
 router.use("/api/action-item-templates", actionItemTemplateRoutes);
 
+import meetingWellnessRoutes from "./meetingWellnessRoutes.js";
+router.use("/api/meeting-wellness", meetingWellnessRoutes);
+
 export default router;

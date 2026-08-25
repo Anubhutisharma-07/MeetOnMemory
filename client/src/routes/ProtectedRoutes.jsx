@@ -85,6 +85,7 @@ import Glossary from "../pages/Glossary.jsx";
 import StandupReports from "../pages/StandupReports.jsx";
 import SlaCompliance from "../pages/SlaCompliance.jsx";
 import TeamAvailability from "../pages/TeamAvailability.jsx";
+import MeetingWellness from "../pages/MeetingWellness.jsx";
 import ActionItemTemplates from "../pages/ActionItemTemplates.jsx";
 
 const ProtectedRoutes = (
@@ -777,6 +778,7 @@ const ProtectedRoutes = (
         </ProtectedRoute>
       }
     />
+      <Route path="/meeting-wellness" element={<ProtectedRoute resource="reports" action="view"><MeetingWellness /></ProtectedRoute>} />
   </React.Fragment>
 );
 
