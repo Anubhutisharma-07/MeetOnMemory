@@ -85,6 +85,7 @@ import Glossary from "../pages/Glossary.jsx";
 import StandupReports from "../pages/StandupReports.jsx";
 import SlaCompliance from "../pages/SlaCompliance.jsx";
 import TeamAvailability from "../pages/TeamAvailability.jsx";
+import SmartMeetingScheduler from "../pages/SmartMeetingScheduler.jsx";
 import ActionItemTemplates from "../pages/ActionItemTemplates.jsx";
 
 const ProtectedRoutes = (
@@ -752,7 +753,15 @@ const ProtectedRoutes = (
       path="/team-availability"
       element={
         <ProtectedRoute resource="reports" action="view">
-          <TeamAvailability />
+          <TeamAvailability /
+    <Route
+      path="/smart-scheduler"
+      element={
+        <ProtectedRoute resource="reports" action="view">
+          <SmartMeetingScheduler />
+        </ProtectedRoute>
+      }
+    />>
         </ProtectedRoute>
       }
     />

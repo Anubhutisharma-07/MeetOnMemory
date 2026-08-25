@@ -14,6 +14,7 @@ import {
   Users,
   Trophy,
   ArrowRight,
+  CalendarClock,
   CalendarRange,
 } from "lucide-react";
 import Navbar from "../components/Navbar.jsx";
@@ -47,6 +48,7 @@ const ROUTE_MAP = {
   "attendance-analytics": "/attendance-analytics",
   "meeting-cost-analytics": "/meeting-cost-analytics",
   leaderboard: "/leaderboard",
+  "smart-scheduler": "/smart-scheduler",
   "meeting-series": "/meeting-series",
 };
 
@@ -194,6 +196,20 @@ const Dashboard = () => {
         "bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border-yellow-100 dark:border-yellow-800",
       accentRing:
         "group-hover:ring-yellow-100 dark:group-hover:ring-yellow-900/40",
+    },
+    {
+      id: "smart-scheduler",
+      icon: CalendarClock,
+      title: "Smart Meeting Scheduler",
+      description:
+        "AI-powered scheduling with conflict detection, availability matching, and smart recommendations.",
+      iconBg: "bg-emerald-50 dark:bg-emerald-900/30",
+      iconColor: "text-emerald-600 dark:text-emerald-400",
+      tag: "AI Scheduling",
+      tagColor:
+        "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800",
+      accentRing:
+        "group-hover:ring-emerald-100 dark:group-hover:ring-emerald-900/40",
     },
   ];
 

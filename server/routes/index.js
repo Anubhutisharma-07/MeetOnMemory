@@ -257,6 +257,8 @@ router.use("/api/action-item-sla", actionItemSlaRoutes);
 
 router.use("/api/team-availability", teamAvailabilityRoutes);
 import actionItemTemplateRoutes from "./actionItemTemplateRoutes.js";
+import smartSchedulerRoutes from "./smartSchedulerRoutes.js";
 router.use("/api/action-item-templates", actionItemTemplateRoutes);
+router.use("/api/smart-scheduler", smartSchedulerRoutes);
 
 export default router;
