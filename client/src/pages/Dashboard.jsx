@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   Trophy,
+  Brain as BrainIcon,
   ArrowRight,
   CalendarRange,
 } from "lucide-react";
@@ -47,6 +48,7 @@ const ROUTE_MAP = {
   "attendance-analytics": "/attendance-analytics",
   "meeting-cost-analytics": "/meeting-cost-analytics",
   leaderboard: "/leaderboard",
+  "notes-ai": "/notes-ai",
   "meeting-series": "/meeting-series",
 };
 
@@ -195,7 +197,20 @@ const Dashboard = () => {
       accentRing:
         "group-hover:ring-yellow-100 dark:group-hover:ring-yellow-900/40",
     },
-  ];
+      {
+      id: 'notes-ai',
+      icon: BrainIcon,
+      title: 'Meeting Notes AI',
+      description:
+        'AI-powered meeting notes with action items, decisions, and quality scoring.',
+      iconBg: 'bg-purple-50 dark:bg-purple-900/30',
+      iconColor: 'text-purple-600 dark:text-purple-400',
+      tag: 'AI Notes',
+      tagColor:
+        'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-100 dark:border-purple-800',
+      accentRing:
+        'group-hover:ring-purple-100 dark:group-hover:ring-purple-900/40',
+    },];
 
   const visibleCards = FEATURE_CARDS.filter((card) => {
     if (card.adminOnly && !isAdmin) return false;

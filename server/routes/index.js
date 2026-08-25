@@ -257,6 +257,8 @@ router.use("/api/action-item-sla", actionItemSlaRoutes);
 
 router.use("/api/team-availability", teamAvailabilityRoutes);
 import actionItemTemplateRoutes from "./actionItemTemplateRoutes.js";
+import meetingNotesAIRoutes from "./meetingNotesAIRoutes.js";
 router.use("/api/action-item-templates", actionItemTemplateRoutes);
+router.use("/api/notes-ai", meetingNotesAIRoutes);
 
 export default router;
