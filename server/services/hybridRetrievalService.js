@@ -22,6 +22,7 @@ import { embedText, searchVectorStore } from "../utils/embeddingUtils.js";
 import { cosineSimilarity } from "../utils/similarity.js";
 import { buildExplanation } from "../utils/explanationBuilder.js";
 import { recordMemoryAccessBatch } from "./importanceScoringService.js";
+import { rerankResults } from "../utils/hybridReranker.js";
 import {
   assertHybridSearchOrganization,
   filterHybridResultsByTenant,
@@ -41,8 +42,16 @@ import {
 export const DEFAULT_OPTIONS = Object.freeze({
   topK: 10,
   semanticTopK: 15,
+
   semanticWeight: 0.7,
   graphWeight: 0.3,
+
+  rerankSemanticWeight: 0.4,
+  rerankGraphWeight: 0.2,
+  rerankKeywordWeight: 0.15,
+  rerankRecencyWeight: 0.1,
+  rerankImportanceWeight: 0.15,
+
   maxHops: 2,
   decay: 0.6,
   minEdgeWeight: 0,
@@ -101,6 +110,57 @@ export function resolveOptions(rawOptions = {}) {
       ? sanitized.graphWeight
       : DEFAULT_OPTIONS.graphWeight;
 
+      let rerankSemanticWeight =
+  typeof sanitized.rerankSemanticWeight === "number" &&
+  sanitized.rerankSemanticWeight >= 0
+    ? sanitized.rerankSemanticWeight
+    : DEFAULT_OPTIONS.rerankSemanticWeight;
+
+let rerankGraphWeight =
+  typeof sanitized.rerankGraphWeight === "number" &&
+  sanitized.rerankGraphWeight >= 0
+    ? sanitized.rerankGraphWeight
+    : DEFAULT_OPTIONS.rerankGraphWeight;
+
+let rerankKeywordWeight =
+  typeof sanitized.rerankKeywordWeight === "number" &&
+  sanitized.rerankKeywordWeight >= 0
+    ? sanitized.rerankKeywordWeight
+    : DEFAULT_OPTIONS.rerankKeywordWeight;
+
+let rerankRecencyWeight =
+  typeof sanitized.rerankRecencyWeight === "number" &&
+  sanitized.rerankRecencyWeight >= 0
+    ? sanitized.rerankRecencyWeight
+    : DEFAULT_OPTIONS.rerankRecencyWeight;
+
+let rerankImportanceWeight =
+  typeof sanitized.rerankImportanceWeight === "number" &&
+  sanitized.rerankImportanceWeight >= 0
+    ? sanitized.rerankImportanceWeight
+    : DEFAULT_OPTIONS.rerankImportanceWeight;
+
+const rerankWeightSum =
+  rerankSemanticWeight +
+  rerankGraphWeight +
+  rerankKeywordWeight +
+  rerankRecencyWeight +
+  rerankImportanceWeight;
+
+if (rerankWeightSum <= 0) {
+  rerankSemanticWeight = DEFAULT_OPTIONS.rerankSemanticWeight;
+  rerankGraphWeight = DEFAULT_OPTIONS.rerankGraphWeight;
+  rerankKeywordWeight = DEFAULT_OPTIONS.rerankKeywordWeight;
+  rerankRecencyWeight = DEFAULT_OPTIONS.rerankRecencyWeight;
+  rerankImportanceWeight = DEFAULT_OPTIONS.rerankImportanceWeight;
+} else {
+  rerankSemanticWeight /= rerankWeightSum;
+  rerankGraphWeight /= rerankWeightSum;
+  rerankKeywordWeight /= rerankWeightSum;
+  rerankRecencyWeight /= rerankWeightSum;
+  rerankImportanceWeight /= rerankWeightSum;
+}
+
   // Normalize so the two weights always sum to 1 - keeps the fused score
   // interpretable (0-1) regardless of what the caller passed in, while still
   // letting them express *relative* emphasis (e.g. semanticWeight: 2,
@@ -129,6 +189,11 @@ export function resolveOptions(rawOptions = {}) {
     maxHops,
     decay,
     minEdgeWeight,
+    rerankSemanticWeight,
+rerankGraphWeight,
+rerankKeywordWeight,
+rerankRecencyWeight,
+rerankImportanceWeight,
     includeTypes: includeTypes.length
       ? includeTypes
       : DEFAULT_OPTIONS.includeTypes,
@@ -322,6 +387,9 @@ async function enrichWithMeetingContext(rankedResults, graph, organization) {
   })
     .select("title createdAt date meetingType tags participants organization")
     .lean();
+    .select(
+  "title createdAt date meetingType tags participants organization importanceScore",
+)
   const meetingById = new Map(meetings.map((m) => [m._id.toString(), m]));
 
   return rankedResults
