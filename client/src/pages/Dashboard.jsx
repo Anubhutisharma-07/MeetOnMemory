@@ -13,6 +13,7 @@ import {
   Shield,
   Users,
   Trophy,
+  TrendingUp as TrendingUpIcon,
   ArrowRight,
   CalendarRange,
 } from "lucide-react";
@@ -47,6 +48,7 @@ const ROUTE_MAP = {
   "attendance-analytics": "/attendance-analytics",
   "meeting-cost-analytics": "/meeting-cost-analytics",
   leaderboard: "/leaderboard",
+  "meeting-roi": "/meeting-roi",
   "meeting-series": "/meeting-series",
 };
 
@@ -195,7 +197,20 @@ const Dashboard = () => {
       accentRing:
         "group-hover:ring-yellow-100 dark:group-hover:ring-yellow-900/40",
     },
-  ];
+      {
+      id: 'meeting-roi',
+      icon: TrendingUpIcon,
+      title: 'Meeting ROI Dashboard',
+      description:
+        'Track meeting costs, decision values, and return on investment.',
+      iconBg: 'bg-emerald-50 dark:bg-emerald-900/30',
+      iconColor: 'text-emerald-600 dark:text-emerald-400',
+      tag: 'ROI',
+      tagColor:
+        'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800',
+      accentRing:
+        'group-hover:ring-emerald-100 dark:group-hover:ring-emerald-900/40',
+    },];
 
   const visibleCards = FEATURE_CARDS.filter((card) => {
     if (card.adminOnly && !isAdmin) return false;
