@@ -42,6 +42,13 @@ const createMeetingSchema = z.object({
   duration: z.number().nullable().optional(),
   location: z.string().optional().default(""),
   venue: z.string().optional().default(""),
+  venueCoordinates: z
+    .object({
+      lat: z.number().finite().nullable().optional(),
+      lng: z.number().finite().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
   participants: z.array(z.record(z.unknown())).optional().default([]),
   agendaItems: z.array(z.record(z.unknown())).optional().default([]),
   policyDetails: z.record(z.unknown()).nullable().optional(),
@@ -62,6 +69,7 @@ const summarizeMeetingSchema = z.object({
   transcript: z.string().optional(),
   date: z.string({ required_error: "Meeting date is required." }),
   title: z.string().optional(),
+  templateId: z.string().optional(),
 });
 
 const updateMeetingSchema = z.object({
@@ -75,6 +83,13 @@ const updateMeetingSchema = z.object({
   duration: z.number().nullable().optional(),
   location: z.string().optional(),
   venue: z.string().optional(),
+  venueCoordinates: z
+    .object({
+      lat: z.number().finite().nullable().optional(),
+      lng: z.number().finite().nullable().optional(),
+    })
+    .nullable()
+    .optional(),
   tags: z.array(z.string()).optional(),
   agendaItems: z.array(z.record(z.unknown())).optional(),
 });
@@ -382,6 +397,7 @@ export const summarizeMeeting = async (req, res, next) => {
       validated.transcript || "",
       validated.date,
       validated.title || null,
+      validated.templateId || null,
     );
 
     if (result.queued) {
@@ -746,5 +762,33 @@ export const getMeetingClip = async (req, res) => {
     res
       .status(500)
       .json({ success: false, message: "Server error fetching clip" });
+  }
+};
+
+export const getPurgePreviewController = async (req, res, next) => {
+  try {
+    const preview = await MeetingService.getPurgePreview(req.user.organization);
+    return sendSuccess(res, preview);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const purgeTrashController = async (req, res, next) => {
+  try {
+    const actorId = getUserId(req);
+    const result = await MeetingService.purgeTrash(req.user.organization);
+
+    await AuditService.logAction({
+      actorId,
+      action: "RECYCLE_BIN_PURGED",
+      entity: "Meeting",
+      organizationId: req.user.organization,
+      details: { deletedCount: result.deletedCount },
+    });
+
+    return sendSuccess(res, result, "Recycle bin purged successfully");
+  } catch (err) {
+    next(err);
   }
 };

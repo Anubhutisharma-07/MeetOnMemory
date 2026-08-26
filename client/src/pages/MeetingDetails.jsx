@@ -4,11 +4,13 @@ import { toast } from "react-toastify";
 import AppContent from "../context/AppContent";
 import { meetingApi } from "../services";
 import MeetingHeader from "../components/meeting-details/MeetingHeader";
+import SeriesNavigation from "../components/meeting-details/SeriesNavigation";
 import MeetingSummary from "../components/meeting-details/MeetingSummary";
 import MinutesApproval from "../components/meetings/MinutesApproval";
 import MeetingCollaborativeNotes from "../components/meeting-details/MeetingCollaborativeNotes";
 import PersonalNotes from "../components/meeting-details/PersonalNotes";
 import MeetingTranscript from "../components/meeting-details/MeetingTranscript";
+import SpeakerAttribution from "../components/meeting-details/SpeakerAttribution";
 import MeetingParticipants from "../components/meeting-details/MeetingParticipants";
 import MeetingAgenda from "../components/meeting-details/MeetingAgenda";
 import MeetingMetadata from "../components/meeting-details/MeetingMetadata";
@@ -29,31 +31,46 @@ import RoleRotationConfig from "../components/meetings/RoleRotationConfig";
 import DuplicateDetectionPanel from "../components/meeting-details/DuplicateDetectionPanel";
 import MeetingTimeline from "../components/meeting-details/MeetingTimeline";
 import RecapStoryViewer from "../components/summaries/RecapStoryViewer";
+import ReactionSummaryCard from "../components/meeting-details/ReactionSummaryCard";
 import { useUser } from "@clerk/clerk-react";
 import Navbar from "../components/Navbar.jsx";
 import BriefingBanner from "../components/meeting-details/BriefingBanner";
+import CompareButton from "../components/meeting-details/CompareButton";
 import AgendaBuilder from "../components/meetings/AgendaBuilder";
+import IcebreakerSection from "../components/meetings/IcebreakerSection";
 import { getBriefing } from "../services/briefingApi";
 import GuestAccessManager from "../components/meetings/GuestAccessManager";
 import MeetingReadiness from "../components/MeetingReadiness";
 import FollowUpThreads from "../components/meeting-details/FollowUpThreads";
+import CommentSection from "../components/meeting-details/CommentSection";
 import PollSection from "../components/meeting-details/PollSection";
 import FeedbackForm from "../components/meeting-details/FeedbackForm";
 import AgendaTimer from "../components/meeting-details/AgendaTimer";
 import AgendaPacingReport from "../components/meeting-details/AgendaPacingReport";
 import ClipManager from "../components/meeting-details/ClipManager";
+import TopicSummary from "../components/meeting-details/TopicSummary";
+import AttachmentPanel from "../components/meeting-details/AttachmentPanel";
+import DigestActions from "../components/meeting-details/DigestActions";
 import HealthScoreCard from "../components/meeting-details/HealthScoreCard";
 import { isMeetingEnded } from "../utils/meetingLifecycle";
+import { canManageMeetingDigest } from "../utils/digestAccess";
 import MeetingRisksPanel from "../components/meetings/MeetingRisksPanel";
-import { Award, ShieldAlert } from "lucide-react";
+import { Award, ShieldAlert, FileText, Star } from "lucide-react";
+import ExportDialog from "../components/export/ExportDialog";
+import RetentionQuizSection from "../components/meetings/RetentionQuizSection";
+import ResourceConflictsPanel from "../components/meeting-details/ResourceConflictsPanel";
+import SkillEndorsementModal from "../components/meetings/SkillEndorsementModal";
+import DebriefQAPanel from "../components/meetings/DebriefQAPanel";
+import DelegationPanel from "../components/meetings/DelegationPanel";
 
 const MeetingDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user: currentUser } = useUser();
-  const { userData } = useContext(AppContent);
+  const { userData } = useContext(AppContent) || {};
   const isViewerOrGuest =
     userData?.role === "viewer" || userData?.role === "guest";
+
   const [meeting, setMeeting] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,7 +78,49 @@ const MeetingDetails = () => {
   const [isPresentModeOpen, setIsPresentModeOpen] = useState(false);
   const [isAnalyticsExpanded, setIsAnalyticsExpanded] = useState(false);
   const [isStoryViewerOpen, setIsStoryViewerOpen] = useState(false);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [isEndorseModalOpen, setIsEndorseModalOpen] = useState(false);
   const [briefingStatus, setBriefingStatus] = useState("idle");
+
+  const dbUserId = currentUser?.publicMetadata?.dbUserId;
+  const participant = meeting?.participants?.find(
+    (p) =>
+      p.user?.toString() === dbUserId || p.user?._id?.toString() === dbUserId,
+  );
+  const userRole = participant?.role || null;
+  const isOrganizer =
+    userData?.role === "admin" ||
+    userData?.role === "owner" ||
+    userRole === "host" ||
+    userRole === "organizer" ||
+    (dbUserId &&
+      (meeting?.uploadedBy?._id?.toString() === dbUserId ||
+        meeting?.uploadedBy?.toString() === dbUserId)) ||
+    (userData?._id &&
+      (meeting?.uploadedBy?._id?.toString() === userData._id.toString() ||
+        meeting?.uploadedBy?.toString() === userData._id.toString()));
+
+  const handleCitationClick = (citation) => {
+    if (citation.type === "transcript" && citation.timestamp !== null) {
+      const event = new CustomEvent("seekToTimestamp", {
+        detail: citation.timestamp,
+      });
+      window.dispatchEvent(event);
+      const transcriptEl = document.querySelector(
+        `[data-start-time="${citation.timestamp}"]`,
+      );
+      if (transcriptEl) {
+        transcriptEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    } else if (citation.type === "decision") {
+      const decisionEl = document.querySelector(
+        `[data-decision-id="${citation.refId}"]`,
+      );
+      if (decisionEl) {
+        decisionEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+  };
 
   const handleGenerateBriefing = async () => {
     setBriefingStatus("generating");
@@ -115,6 +174,17 @@ const MeetingDetails = () => {
 
     fetchMeetingDetails();
   }, [id]);
+
+  const refreshMeeting = async () => {
+    try {
+      const { data } = await meetingApi.getMeetingById(id);
+      if (data.success) {
+        setMeeting(data.meeting);
+      }
+    } catch (err) {
+      console.error("Error refreshing meeting after speaker mapping:", err);
+    }
+  };
 
   const handleBack = () => {
     if (
@@ -276,10 +346,32 @@ const MeetingDetails = () => {
             </div>
           )}
 
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end gap-3">
+            <CompareButton meetingId={meeting._id} />
+            <button
+              onClick={() => setIsExportDialogOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
+              data-testid="open-export-dialog-btn"
+            >
+              <FileText className="w-4 h-4" />
+              Export Minutes
+            </button>
+            <button
+              onClick={() => setIsEndorseModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-medium shadow-sm transition-colors text-sm"
+              disabled={isViewerOrGuest}
+              title={
+                isViewerOrGuest
+                  ? "Viewers cannot endorse peers"
+                  : "Recognize peers for their skills"
+              }
+            >
+              <Star className="w-4 h-4" />
+              Recognize Peers
+            </button>
             <button
               onClick={() => setIsStoryViewerOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-sm hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-sm hover:opacity-90 transition-opacity text-sm"
             >
               <svg
                 className="w-5 h-5"
@@ -327,6 +419,11 @@ const MeetingDetails = () => {
             onShare={() => setShareModalOpen(true)}
             onPresent={() => setIsPresentModeOpen(true)}
           />
+          {(meeting.series || meeting.seriesId) && (
+            <SeriesNavigation meeting={meeting} />
+          )}
+
+          <ResourceConflictsPanel meeting={meeting} />
 
           <div className="p-6 bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm mt-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -385,6 +482,14 @@ const MeetingDetails = () => {
             </div>
           </div>
           <MeetingSummary meeting={meeting} />
+
+          <RetentionQuizSection
+            meeting={meeting}
+            isOrganizer={
+              currentUser?.publicMetadata?.dbUserId === meeting.uploadedBy
+            }
+          />
+
           <div className="mt-6 mb-6">
             <HealthScoreCard
               meetingId={meeting._id}
@@ -412,7 +517,31 @@ const MeetingDetails = () => {
             <HighlightReel meetingId={meeting._id} />
           </div>
 
-          <MeetingTranscript meeting={meeting} />
+          <div className="mt-6 mb-6">
+            <SpeakerAttribution
+              meetingId={meeting._id}
+              participants={meeting.participants}
+              onMappingChange={refreshMeeting}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+            <div className="xl:col-span-2">
+              <MeetingTranscript meeting={meeting} />
+            </div>
+            <div className="xl:col-span-1 h-[600px]">
+              <DebriefQAPanel
+                meetingId={meeting._id}
+                onCitationClick={handleCitationClick}
+              />
+            </div>
+          </div>
+          <div className="mt-6 mb-6">
+            <TopicSummary
+              meetingId={meeting._id}
+              canExtract={!isViewerOrGuest}
+            />
+          </div>
           <div className="mt-6 mb-6">
             <ClipManager
               meetingId={meeting._id}
@@ -424,6 +553,10 @@ const MeetingDetails = () => {
 
           <div className="mt-6 mb-6">
             <FollowUpThreads meetingId={meeting._id} />
+          </div>
+
+          <div className="mt-6 mb-6">
+            <CommentSection meetingId={meeting._id} />
           </div>
 
           <div className="mt-6 mb-6">
@@ -442,6 +575,9 @@ const MeetingDetails = () => {
           <div className="mt-6 mb-6">
             <SentimentTimeline meetingId={meeting._id} />
           </div>
+
+          {/* Reaction Summary Card (Issue #1993) */}
+          <ReactionSummaryCard meetingId={meeting._id} />
 
           {/* Speaking Time Analytics Section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mt-6 mb-6 p-6">
@@ -527,7 +663,10 @@ const MeetingDetails = () => {
             isOrganizer={
               currentUser?.publicMetadata?.dbUserId === meeting.uploadedBy
             }
+            userRole={userRole}
           />
+
+          <IcebreakerSection meetingId={meeting._id} />
 
           <MeetingAgenda meeting={meeting} />
           <div className="mt-6 mb-6">
@@ -539,8 +678,30 @@ const MeetingDetails = () => {
             </div>
           )}
           <MeetingMetadata meeting={meeting} />
+          <div className="mt-6 mb-6">
+            <AttachmentPanel
+              meetingId={meeting._id}
+              userRole={userData?.role}
+              currentUserId={userData?._id}
+            />
+          </div>
+          {canManageMeetingDigest({
+            meeting,
+            userData,
+            dbUserId,
+          }) && (
+            <div className="mt-6 mb-6">
+              <DigestActions meetingId={meeting._id} canManage />
+            </div>
+          )}
           {currentUser?.publicMetadata?.dbUserId === meeting.uploadedBy && (
             <GuestAccessManager meetingId={meeting._id} />
+          )}
+          {isOrganizer && (
+            <DelegationPanel
+              meetingId={meeting._id}
+              participants={meeting.participants}
+            />
           )}
           <MeetingActions
             meeting={meeting}
@@ -571,6 +732,21 @@ const MeetingDetails = () => {
           onClose={() => setIsStoryViewerOpen(false)}
         />
       )}
+
+      {isExportDialogOpen && (
+        <ExportDialog
+          meetingId={meeting._id}
+          onClose={() => setIsExportDialogOpen(false)}
+        />
+      )}
+
+      <SkillEndorsementModal
+        isOpen={isEndorseModalOpen}
+        onClose={() => setIsEndorseModalOpen(false)}
+        meetingId={meeting._id}
+        participants={meeting.participants}
+        currentUser={currentUser}
+      />
     </div>
   );
 };
