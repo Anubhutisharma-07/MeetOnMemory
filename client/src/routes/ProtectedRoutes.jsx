@@ -58,6 +58,7 @@ import AdminPanel from "../pages/AdminPanel.jsx";
 import ResourceManagement from "../pages/Admin/ResourceManagement.jsx";
 import Bookmarks from "../pages/Bookmarks.jsx";
 import ActivityFeed from "../pages/ActivityFeed.jsx";
+import AbsenteeCatchUpInbox from "../pages/AbsenteeCatchUpInbox.jsx";
 import TagBrowser from "../pages/TagBrowser.jsx";
 import AttendanceAnalytics from "../pages/AttendanceAnalytics.jsx";
 import RsvpInbox from "../pages/RsvpInbox.jsx";
@@ -92,9 +93,20 @@ import MeetingWellness from "../pages/MeetingWellness.jsx";
 import ActionItemTemplates from "../pages/ActionItemTemplates.jsx";
 import IntegrationMarketplaceHub from "../pages/IntegrationMarketplaceHub.jsx";
 import SentimentTrends from "../pages/SentimentTrends.jsx";
+import TopicIntelligence from "../pages/TopicIntelligence.jsx";
 
 const ProtectedRoutes = (
   <React.Fragment>
+    <Route
+      path="/topic-intelligence"
+      element={
+        <ProtectedRoute>
+          <RouteErrorBoundary>
+            <TopicIntelligence />
+          </RouteErrorBoundary>
+        </ProtectedRoute>
+      }
+    />
     <Route
       path="/sentiment-trends"
       element={
