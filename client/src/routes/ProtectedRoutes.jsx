@@ -63,6 +63,7 @@ import TagBrowser from "../pages/TagBrowser.jsx";
 import AttendanceAnalytics from "../pages/AttendanceAnalytics.jsx";
 import RsvpInbox from "../pages/RsvpInbox.jsx";
 import MeetingCostAnalytics from "../pages/MeetingCostAnalytics.jsx";
+import MeetingBudgetTracker from "../pages/MeetingBudgetTracker.jsx";
 import RecapScheduleDashboard from "../pages/RecapScheduleDashboard.jsx";
 import MeetingHealthDashboard from "../pages/MeetingHealthDashboard.jsx";
 import AutomationRules from "../pages/AutomationRules.jsx";
@@ -742,6 +743,14 @@ const ProtectedRoutes = (
       element={
         <ProtectedRoute resource="reports" action="view">
           <MeetingCostAnalytics />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/meeting-budget-tracker"
+      element={
+        <ProtectedRoute resource="reports" action="view">
+          <MeetingBudgetTracker />
         </ProtectedRoute>
       }
     />
