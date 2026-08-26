@@ -58,9 +58,21 @@ const meetingSchema = new mongoose.Schema(
       type: String, // Location/platform (e.g., "Zoom", "Conference Room A")
       default: "",
     },
+    allowObservers: {
+      type: Boolean,
+      default: false,
+    },
+    requireQuiz: {
+      type: Boolean,
+      default: false,
+    },
     venue: {
       type: String, // Venue details (physical address or meeting link)
       default: "",
+    },
+    venueCoordinates: {
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
     },
     participants: [
       {
