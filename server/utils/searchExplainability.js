@@ -201,7 +201,7 @@ export function buildSearchExplainability({
   const decisions = normalizeStructuredList(
     structured?.decisions || structured?.keyDecisions,
   );
-  const _actionItems = normalizeStructuredList(
+  const actionItems = normalizeStructuredList(
     structured?.action_items || structured?.actionItems,
   );
 
@@ -209,6 +209,9 @@ export function buildSearchExplainability({
     firstMatchingToken(item, tokens),
   );
   const matchingDecisions = decisions.filter((item) =>
+    firstMatchingToken(item, tokens),
+  );
+  const matchingActionItems = actionItems.filter((item) =>
     firstMatchingToken(item, tokens),
   );
 
@@ -237,6 +240,20 @@ export function buildSearchExplainability({
       field: "decisions",
       label: "Matching decisions",
       values: matchingDecisions.slice(0, MAX_LIST_ITEMS),
+    });
+  }
+
+  if (matchingActionItems.length) {
+    metadataMatches.push({
+      field: "actionItems",
+      label: "Matching action items",
+      values: matchingActionItems.slice(0, MAX_LIST_ITEMS),
+    });
+    evidence.push({
+      kind: "metadata",
+      field: "actionItems",
+      label: "Matching action items",
+      values: matchingActionItems.slice(0, MAX_LIST_ITEMS),
     });
   }
 
