@@ -80,6 +80,7 @@ import testimonialRoutes, {
   adminTestimonialRouter,
 } from "./testimonialRoutes.js";
 import absenteeCatchUpRoutes from "./absenteeCatchUpRoutes.js";
+import asyncMeetingRoutes from "./asyncMeetingRoutes.js";
 
 import calendarRoutes from "./calendarRoutes.js";
 import assistantRoutes from "./assistantRoutes.js";
@@ -214,6 +215,7 @@ router.use("/api/rsvps", meetingRsvpRoutes);
 router.use("/api/testimonials", testimonialRoutes);
 router.use("/api/admin/testimonials", adminTestimonialRouter);
 router.use("/api/absentee-catchup", absenteeCatchUpRoutes);
+router.use("/api/async-meetings", asyncMeetingRoutes);
 import debriefQARoutes from "./debriefQARoutes.js";
 router.use("/api/debrief", debriefQARoutes);
 import adminJobsRoutes from "./adminJobsRoutes.js";
@@ -253,7 +255,11 @@ import escalationRoutes from "./escalationRoutes.js";
 router.use("/api/escalations", escalationRoutes);
 import participantEngagementRoutes from "./participantEngagementRoutes.js";
 router.use("/api/engagement", participantEngagementRoutes);
-
+import participantContributionRoutes from "./participantContributionRoutes.js";
+router.use(
+  "/api/meetings/:meetingId/contributions",
+  participantContributionRoutes,
+);
 import meetingPatternRoutes from "./meetingPatternRoutes.js";
 router.use("/api/patterns", meetingPatternRoutes);
 
@@ -296,5 +302,8 @@ import actionItemGraphRoutes from "./actionItemGraphRoutes.js";
 router.use("/api/action-item-graph", actionItemGraphRoutes);
 import meetingBudgetRoutes from "./meetingBudgetRoutes.js";
 router.use("/api/meeting-budgets", meetingBudgetRoutes);
+
+import recurringActionItemRoutes from "./recurringActionItemRoutes.js";
+router.use("/api/recurring-action-items", recurringActionItemRoutes);
 
 export default router;
