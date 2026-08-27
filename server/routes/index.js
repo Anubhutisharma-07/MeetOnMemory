@@ -306,4 +306,7 @@ router.use("/api/meeting-budgets", meetingBudgetRoutes);
 import recurringActionItemRoutes from "./recurringActionItemRoutes.js";
 router.use("/api/recurring-action-items", recurringActionItemRoutes);
 
+import apiKeyRoutes from "./apiKeyRoutes.js";
+router.use("/api/api-keys", apiKeyRoutes);
+
 export default router;
