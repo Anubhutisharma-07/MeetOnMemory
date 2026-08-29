@@ -58,6 +58,11 @@ import agendaSuggestionRoutes from "./agendaSuggestionRoutes.js";
 import translationRoutes from "./translationRoutes.js";
 import personalNoteRoutes from "./personalNoteRoutes.js";
 import aiMeetingNoteRoutes from "./aiMeetingNoteRoutes.js";
+<<<<<<< Updated upstream
+=======
+import mindMapRoutes from "./mindMapRoutes.js";
+import agendaRolloverRoutes from "./agendaRolloverRoutes.js";
+>>>>>>> Stashed changes
 import templateLibraryRoutes from "./templateLibraryRoutes.js";
 import transcriptAnnotationRoutes from "./transcriptAnnotationRoutes.js";
 import glossaryRoutes from "./glossaryRoutes.js";
@@ -177,6 +182,7 @@ router.use("/api/meeting-workload", meetingWorkloadRoutes);
 router.use("/api/meetings/:meetingId/attachments", attachmentRoutes);
 router.use("/api/icebreakers", icebreakerRoutes);
 router.use("/api/physical-resources", resourceBookingRoutes);
+router.use("/api/meetings", agendaRolloverRoutes);
 router.use("/api/meetings/:meetingId/minutes-approval", minutesApprovalRoutes);
 router.use("/api/meeting-series", meetingSeriesRoutes);
 router.use("/api/series-diff", meetingSeriesDiffRoutes);
