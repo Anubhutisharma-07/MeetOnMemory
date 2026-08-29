@@ -87,6 +87,8 @@ const vitestOwnedSources = new Set([
   "server/models/physicalResourceModel.js",
   "server/middleware/authMiddleware.js",
   "server/routes/index.js",
+  "server/controllers/keyMomentController.js",
+  "server/routes/keyMomentRoutes.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
   "server/routes/index.js":
@@ -101,6 +103,12 @@ const VITEST_SOURCE_TEST_MAP = {
     "server/tests/resourceBookingController.vitest.test.js",
   "server/models/physicalResourceModel.js":
     "server/tests/resourceBookingController.vitest.test.js",
+  "server/controllers/keyMomentController.js":
+    "server/tests/keyMomentController.vitest.test.js",
+  "server/routes/keyMomentRoutes.js":
+    "server/tests/keyMomentController.vitest.test.js",
+  "server/models/organizationModel.js":
+    "server/tests/OrganizationService.test.js",
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/utils/transcriptEncryption.js":
