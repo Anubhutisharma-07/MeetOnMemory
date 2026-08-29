@@ -181,6 +181,9 @@
       "name": "Guest"
     },
     {
+      "name": "Guest Access"
+    },
+    {
       "name": "Guest Tokens"
     },
     {
@@ -18741,6 +18744,101 @@
         }
       }
     },
+    "/api/guest-tokens/{tokenId}": {
+      "delete": {
+        "tags": ["Guest Tokens"],
+        "summary": "DELETE /api/guest-tokens/{tokenId}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/meetings/{meetingId}/guest-analytics": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "GET /api/meetings/{meetingId}/guest-analytics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/analytics/{meetingId}": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "GET /api/analytics/{meetingId}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/meetings/{meetingId}/guest-feedback/export": {
+      "get": {
+        "tags": ["Meetings"],
+        "summary": "GET /api/meetings/{meetingId}/guest-feedback/export",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/feedback/export": {
+      "get": {
+        "tags": ["Feedback"],
+        "summary": "GET /api/feedback/export",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "/api/guest/meeting/{token}": {
       "get": {
         "tags": ["Guest"],
@@ -18760,10 +18858,337 @@
         }
       }
     },
+    "/api/guest/meeting/{token}/join": {
+      "post": {
+        "tags": ["Guest"],
+        "summary": "POST /api/guest/meeting/{token}/join",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/guest/meeting/{token}/comments": {
       "post": {
         "tags": ["Guest"],
         "summary": "POST /api/guest/meeting/{token}/comments",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest/meeting/{token}/feedback": {
+      "post": {
+        "tags": ["Guest"],
+        "summary": "POST /api/guest/meeting/{token}/feedback",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest-access/meetings/{meetingId}/guest-tokens": {
+      "post": {
+        "tags": ["Guest Access"],
+        "summary": "POST /api/guest-access/meetings/{meetingId}/guest-tokens",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/meetings/{meetingId}/guest-tokens",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest-tokens/{tokenId}/revoke": {
+      "post": {
+        "tags": ["Guest Access"],
+        "summary": "POST /api/guest-access/guest-tokens/{tokenId}/revoke",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest-tokens/{tokenId}": {
+      "delete": {
+        "tags": ["Guest Access"],
+        "summary": "DELETE /api/guest-access/guest-tokens/{tokenId}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/meetings/{meetingId}/guest-analytics": {
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/meetings/{meetingId}/guest-analytics",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/analytics/{meetingId}": {
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/analytics/{meetingId}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/meetings/{meetingId}/guest-feedback/export": {
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/meetings/{meetingId}/guest-feedback/export",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/feedback/export": {
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/feedback/export",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest/meeting/{token}": {
+      "get": {
+        "tags": ["Guest Access"],
+        "summary": "GET /api/guest-access/guest/meeting/{token}",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest/meeting/{token}/join": {
+      "post": {
+        "tags": ["Guest Access"],
+        "summary": "POST /api/guest-access/guest/meeting/{token}/join",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest/meeting/{token}/comments": {
+      "post": {
+        "tags": ["Guest Access"],
+        "summary": "POST /api/guest-access/guest/meeting/{token}/comments",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/guest-access/guest/meeting/{token}/feedback": {
+      "post": {
+        "tags": ["Guest Access"],
+        "summary": "POST /api/guest-access/guest/meeting/{token}/feedback",
         "security": [
           {
             "bearerAuth": []

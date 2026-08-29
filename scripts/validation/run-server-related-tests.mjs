@@ -81,16 +81,30 @@ const vitestOwnedSources = new Set([
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
  feature/breakout-rooms-facilitation-2453
+ feature/breakout-rooms-facilitation-2453
   "server/controllers/breakoutRoomController.js",
   "server/routes/breakoutRoomRoutes.js",
   "server/services/breakoutRoomService.js",
   "server/models/breakoutRoomModel.js",
   "server/models/BreakoutRoom.js",
   "server/socket/meetingSocket.js",
+
+ feature/guest-access-analytics-2454
+ feature/guest-access-analytics-2454
+  "server/controllers/guestAccessController.js",
+  "server/routes/guestAccessRoutes.js",
+  "server/services/guestAccessService.js",
+  "server/models/guestAccessTokenModel.js",
+  "server/models/guestFeedbackModel.js",
+  "server/models/GuestFeedback.js",
+  "server/models/GuestToken.js",
+  "server/middleware/authMiddleware.js",
+ main
   "server/routes/index.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
   "server/routes/index.js":
+ feature/breakout-rooms-facilitation-2453
     "server/tests/breakoutRoomController.vitest.test.js",
   "server/controllers/breakoutRoomController.js":
     "server/tests/breakoutRoomController.vitest.test.js",
@@ -105,6 +119,23 @@ const VITEST_SOURCE_TEST_MAP = {
   "server/socket/meetingSocket.js":
     "server/tests/breakoutRoomController.vitest.test.js",
 
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/controllers/guestAccessController.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/routes/guestAccessRoutes.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/services/guestAccessService.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/guestAccessTokenModel.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/guestFeedbackModel.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/GuestFeedback.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/GuestToken.js":
+    "server/tests/guestAccessController.vitest.test.js",
+ main
+
   "server/controllers/resourceBookingController.js",
   "server/routes/resourceBookingRoutes.js",
   "server/services/resourceBookingService.js",
@@ -112,6 +143,7 @@ const VITEST_SOURCE_TEST_MAP = {
   "server/models/physicalResourceModel.js",
   "server/middleware/authMiddleware.js",
   "server/routes/index.js",
+ main
   "server/controllers/keyMomentController.js",
   "server/routes/keyMomentRoutes.js",
 ]);
@@ -132,6 +164,7 @@ const VITEST_SOURCE_TEST_MAP = {
     "server/tests/keyMomentController.vitest.test.js",
   "server/routes/keyMomentRoutes.js":
     "server/tests/keyMomentController.vitest.test.js",
+ main
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
  main
