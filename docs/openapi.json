@@ -79,6 +79,9 @@
       "name": "Bookmarks"
     },
     {
+      "name": "Breakouts"
+    },
+    {
       "name": "Briefings"
     },
     {
@@ -9159,6 +9162,90 @@
         }
       }
     },
+    "/api/meetings/{meetingId}/breakout-rooms/random-assign": {
+      "post": {
+        "tags": ["Meetings"],
+        "summary": "POST /api/meetings/{meetingId}/breakout-rooms/random-assign",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meetings/{meetingId}/breakout-rooms/broadcast": {
+      "post": {
+        "tags": ["Meetings"],
+        "summary": "POST /api/meetings/{meetingId}/breakout-rooms/broadcast",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meetings/{meetingId}/breakout-rooms/close-all": {
+      "post": {
+        "tags": ["Meetings"],
+        "summary": "POST /api/meetings/{meetingId}/breakout-rooms/close-all",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/meetings/{meetingId}/breakout-rooms/{roomId}/participants": {
       "put": {
         "tags": ["Meetings"],
@@ -9219,6 +9306,219 @@
       "post": {
         "tags": ["Meetings"],
         "summary": "POST /api/meetings/{meetingId}/breakout-rooms/{roomId}/close",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": ["Breakouts"],
+        "summary": "GET /api/breakouts",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/breakouts/random-assign": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts/random-assign",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts/broadcast": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts/broadcast",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts/close-all": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts/close-all",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts/{roomId}/participants": {
+      "put": {
+        "tags": ["Breakouts"],
+        "summary": "PUT /api/breakouts/{roomId}/participants",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts/{roomId}/start": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts/{roomId}/start",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/breakouts/{roomId}/close": {
+      "post": {
+        "tags": ["Breakouts"],
+        "summary": "POST /api/breakouts/{roomId}/close",
         "security": [
           {
             "bearerAuth": []
