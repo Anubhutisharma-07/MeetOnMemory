@@ -83,6 +83,7 @@ import FollowUpDashboard from "../pages/FollowUpDashboard.jsx";
 import EscalationDashboard from "../pages/EscalationDashboard.jsx";
 import Glossary from "../pages/Glossary.jsx";
 import StandupReports from "../pages/StandupReports.jsx";
+import MeetingAgendaBuilder from "../pages/MeetingAgendaBuilder.jsx";
 import SlaCompliance from "../pages/SlaCompliance.jsx";
 import TeamAvailability from "../pages/TeamAvailability.jsx";
 import ActionItemTemplates from "../pages/ActionItemTemplates.jsx";
@@ -745,6 +746,14 @@ const ProtectedRoutes = (
       element={
         <ProtectedRoute resource="reports" action="view">
           <StandupReports />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/agenda-builder"
+      element={
+        <ProtectedRoute resource="reports" action="view">
+          <MeetingAgendaBuilder />
         </ProtectedRoute>
       }
     />
