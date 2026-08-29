@@ -58,11 +58,7 @@ import agendaSuggestionRoutes from "./agendaSuggestionRoutes.js";
 import translationRoutes from "./translationRoutes.js";
 import personalNoteRoutes from "./personalNoteRoutes.js";
 import aiMeetingNoteRoutes from "./aiMeetingNoteRoutes.js";
-<<<<<<< Updated upstream
-=======
-import mindMapRoutes from "./mindMapRoutes.js";
 import agendaRolloverRoutes from "./agendaRolloverRoutes.js";
->>>>>>> Stashed changes
 import templateLibraryRoutes from "./templateLibraryRoutes.js";
 import transcriptAnnotationRoutes from "./transcriptAnnotationRoutes.js";
 import glossaryRoutes from "./glossaryRoutes.js";
