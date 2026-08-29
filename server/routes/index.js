@@ -287,6 +287,7 @@ router.use("/api/patterns", meetingPatternRoutes);
 
 import guestAccessRoutes from "./guestAccessRoutes.js";
 router.use("/api", guestAccessRoutes);
+router.use("/api/guest-access", guestAccessRoutes);
 router.use("/api/custom-fields", customFieldRoutes);
 
 import meetingNudgeRoutes from "./meetingNudgeRoutes.js";

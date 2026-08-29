@@ -80,6 +80,37 @@ const vitestOwnedSources = new Set([
   "server/controllers/aiMeetingNoteController.js",
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
+ feature/guest-access-analytics-2454
+ feature/guest-access-analytics-2454
+  "server/controllers/guestAccessController.js",
+  "server/routes/guestAccessRoutes.js",
+  "server/services/guestAccessService.js",
+  "server/models/guestAccessTokenModel.js",
+  "server/models/guestFeedbackModel.js",
+  "server/models/GuestFeedback.js",
+  "server/models/GuestToken.js",
+  "server/middleware/authMiddleware.js",
+  "server/routes/index.js",
+]);
+const VITEST_SOURCE_TEST_MAP = {
+  "server/routes/index.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/controllers/guestAccessController.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/routes/guestAccessRoutes.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/services/guestAccessService.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/guestAccessTokenModel.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/guestFeedbackModel.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/GuestFeedback.js":
+    "server/tests/guestAccessController.vitest.test.js",
+  "server/models/GuestToken.js":
+    "server/tests/guestAccessController.vitest.test.js",
+
+
   "server/controllers/resourceBookingController.js",
   "server/routes/resourceBookingRoutes.js",
   "server/services/resourceBookingService.js",
@@ -87,6 +118,7 @@ const vitestOwnedSources = new Set([
   "server/models/physicalResourceModel.js",
   "server/middleware/authMiddleware.js",
   "server/routes/index.js",
+ main
   "server/controllers/keyMomentController.js",
   "server/routes/keyMomentRoutes.js",
 ]);
@@ -107,6 +139,7 @@ const VITEST_SOURCE_TEST_MAP = {
     "server/tests/keyMomentController.vitest.test.js",
   "server/routes/keyMomentRoutes.js":
     "server/tests/keyMomentController.vitest.test.js",
+ main
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/models/organizationModel.js":
