@@ -4,6 +4,9 @@ export const topicApi = {
   getTopicClusters: (orgId) =>
     apiClient.get(`/api/topics/clusters/org/${orgId}`),
 
+  getTopicVelocityAndTrends: (orgId) =>
+    apiClient.get(`/api/topics/velocity/org/${orgId}`),
+
   renameCluster: (clusterId, label) =>
     apiClient.put(`/api/topics/clusters/${clusterId}`, { label }),
 
@@ -26,6 +29,15 @@ export const topicApi = {
 
   extractTopicsForMeeting: (meetingId) =>
     apiClient.post(`/api/topics/extract/${meetingId}`),
+
+  getTopicEvolutionTimeline: (topic = "", options = {}) => {
+    const params = new URLSearchParams();
+    if (topic) params.append("topic", topic);
+    if (options.startDate) params.append("startDate", options.startDate);
+    if (options.endDate) params.append("endDate", options.endDate);
+    const query = params.toString();
+    return apiClient.get(`/api/topics/evolution${query ? `?${query}` : ""}`);
+  },
 };
 
 export default topicApi;

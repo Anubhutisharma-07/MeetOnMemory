@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import {
   meetingApi,
+  meetingSeriesApi,
   meetingTemplateApi,
   aiSummaryTemplateApi,
 } from "../../../services";
@@ -8,6 +9,8 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { customFieldApi } from "../../../api/customFieldApi";
 import { focusTimeApi } from "../../../api/focusTimeApi";
 import { calendarAvailabilityApi } from "../../../api/calendarAvailabilityApi";
+import resourceBookingApi from "../../../services/resourceBookingApi";
+import { attachmentApi } from "../../../services/attachmentApi";
 import AppContent from "../../../context/AppContent";
 import {
   buildMeetingDraftKey,
@@ -26,10 +29,14 @@ import {
 const CONFLICT_MODE_STORAGE_KEY = "meet-on-memory:schedule-conflict-mode";
 
 const readConflictMode = () => {
-  if (typeof window === "undefined") return "soft";
-  return window.localStorage.getItem(CONFLICT_MODE_STORAGE_KEY) === "hard"
-    ? "hard"
-    : "soft";
+  try {
+    if (typeof window === "undefined" || !window.localStorage) return "soft";
+    return window.localStorage.getItem(CONFLICT_MODE_STORAGE_KEY) === "hard"
+      ? "hard"
+      : "soft";
+  } catch {
+    return "soft";
+  }
 };
 
 export const buildDuplicateScheduleState = (duplicateData = {}) => ({
@@ -42,9 +49,11 @@ export const buildDuplicateScheduleState = (duplicateData = {}) => ({
     duration: duplicateData.duration ?? "",
     location: duplicateData.location || "",
     venue: duplicateData.venue || "",
+    venueCoordinates: duplicateData.venueCoordinates || null,
     syncToCalendar: true,
     reminderEnabled: duplicateData.reminderEnabled || false,
     reminderMinutesBefore: duplicateData.reminderMinutesBefore || 30,
+    tags: duplicateData.tags || [],
   },
   participants: (duplicateData.participants || []).map(
     (participant, index) => ({
@@ -68,7 +77,7 @@ export const useScheduleMeeting = ({
   meetingId = null,
   serverUpdatedAt = null,
 } = {}) => {
-  const { userData } = useContext(AppContent);
+  const { userData } = useContext(AppContent) ?? {};
   const [scheduleData, setScheduleData] = useState({
     title: "",
     description: "",
@@ -78,9 +87,13 @@ export const useScheduleMeeting = ({
     duration: "",
     location: "",
     venue: "",
+    venueCoordinates: null,
     syncToCalendar: true,
     reminderEnabled: false,
     reminderMinutesBefore: 30,
+    recurrencePattern: "none",
+    endDate: "",
+    tags: [],
   });
   const [participants, setParticipants] = useState([]);
   const [newParticipant, setNewParticipant] = useState({ name: "", email: "" });
@@ -102,6 +115,7 @@ export const useScheduleMeeting = ({
     policyDetails: null,
     recordingType: "upload",
   });
+  const [selectedResources, setSelectedResources] = useState([]);
 
   const [focusBlocks, setFocusBlocks] = useState([]);
   const [focusConflicts, setFocusConflicts] = useState([]);
@@ -127,6 +141,7 @@ export const useScheduleMeeting = ({
       agendaItems,
       selectedTemplateId,
       selectedAiSummaryTemplateId,
+      selectedResources,
     }),
     [
       participants,
@@ -134,6 +149,7 @@ export const useScheduleMeeting = ({
       agendaItems,
       selectedTemplateId,
       selectedAiSummaryTemplateId,
+      selectedResources,
     ],
   );
 
@@ -141,6 +157,8 @@ export const useScheduleMeeting = ({
     if (draft?.scheduleData) setScheduleData(draft.scheduleData);
     if (Array.isArray(draft?.participants)) setParticipants(draft.participants);
     if (Array.isArray(draft?.agendaItems)) setAgendaItems(draft.agendaItems);
+    if (Array.isArray(draft?.selectedResources))
+      setSelectedResources(draft.selectedResources);
     if (typeof draft?.selectedTemplateId === "string") {
       setSelectedTemplateId(draft.selectedTemplateId);
     }
@@ -298,8 +316,12 @@ export const useScheduleMeeting = ({
   const setConflictMode = useCallback((modeValue) => {
     const nextMode = modeValue === "hard" ? "hard" : "soft";
     setConflictModeState(nextMode);
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(CONFLICT_MODE_STORAGE_KEY, nextMode);
+    try {
+      if (typeof window !== "undefined" && window.localStorage) {
+        window.localStorage.setItem(CONFLICT_MODE_STORAGE_KEY, nextMode);
+      }
+    } catch {
+      // Ignore storage failures (private mode / missing localStorage in tests)
     }
   }, []);
 
@@ -384,6 +406,38 @@ export const useScheduleMeeting = ({
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
+  const resetScheduleForm = () => {
+    setScheduleData({
+      title: "",
+      description: "",
+      meetingType: "conference",
+      date: "",
+      time: "",
+      duration: "",
+      location: "",
+      venue: "",
+      venueCoordinates: null,
+      syncToCalendar: true,
+      reminderEnabled: false,
+      reminderMinutesBefore: 30,
+      recurrencePattern: "none",
+      endDate: "",
+    });
+    setParticipants([]);
+    setAgendaItems([]);
+    setAttachments([]);
+    setDuplicateMetadata({
+      tags: [],
+      policyDetails: null,
+      recordingType: "upload",
+    });
+    setSelectedTemplateId("");
+    setFocusConflicts([]);
+    setBusyParticipants([]);
+    setSelectedResources([]);
+    clearDraft();
+  };
+
   const handleScheduleSubmit = async (e) => {
     e.preventDefault();
     if (!scheduleData.title.trim()) {
@@ -393,6 +447,32 @@ export const useScheduleMeeting = ({
 
     if (!scheduleData.date || !scheduleData.time) {
       toast.error("Date and time are required");
+      return;
+    }
+
+    const recurrencePattern = scheduleData.recurrencePattern || "none";
+    const isRecurring =
+      Boolean(recurrencePattern) && recurrencePattern !== "none";
+
+    if (isRecurring) {
+      if (!scheduleData.endDate) {
+        toast.error("End date is required for recurring meetings");
+        return;
+      }
+      if (scheduleData.date > scheduleData.endDate) {
+        toast.error("Start date must be before or equal to end date");
+        return;
+      }
+    }
+
+    const hasHardFocusBlock = focusConflicts.some(
+      (c) => c.policy === "block" || c.allowOverride === false,
+    );
+
+    if (hasHardFocusBlock) {
+      toast.error(
+        "Scheduling is blocked by a strict Focus Time block. Override is not permitted.",
+      );
       return;
     }
 
@@ -412,16 +492,66 @@ export const useScheduleMeeting = ({
       return;
     }
 
+    let auditNote;
+    if (focusConflicts.length > 0 && conflictMode !== "hard") {
+      const confirmed = window.confirm(
+        "This meeting overlaps with a focus time block. Schedule anyway?",
+      );
+      if (!confirmed) return;
+
+      const reason = window.prompt(
+        "Please provide a reason for overriding focus time:",
+      );
+      if (!reason || !reason.trim()) {
+        toast.error(
+          "An override reason is required to schedule over focus time",
+        );
+        return;
+      }
+      auditNote = reason.trim();
+    }
+
     setLoading(true);
     try {
+      const selectedTags =
+        Array.isArray(scheduleData.tags) && scheduleData.tags.length > 0
+          ? scheduleData.tags
+          : duplicateMetadata.tags || [];
+
       const payload = {
         ...scheduleData,
         participants,
-        tags: duplicateMetadata.tags,
+        tags: selectedTags,
+        metadata: {
+          tags: selectedTags,
+        },
         policyDetails: duplicateMetadata.policyDetails,
         recordingType: duplicateMetadata.recordingType,
         agendaItems: normalizeAgendaItems(agendaItems),
+        ...(auditNote ? { auditNote } : {}),
       };
+
+      if (isRecurring) {
+        const seriesPayload = {
+          ...payload,
+          startDate: scheduleData.date,
+          endDate: scheduleData.endDate,
+          recurrencePattern,
+        };
+        const response = await meetingSeriesApi.createSeries(seriesPayload);
+        if (response.data?.success) {
+          const count = response.data.meetingsCreated ?? 0;
+          toast.success(
+            `Meeting series created successfully with ${count} occurrence(s)!`,
+          );
+          resetScheduleForm();
+        } else {
+          toast.error(
+            response.data?.message || "Failed to create meeting series",
+          );
+        }
+        return;
+      }
 
       const response = await meetingApi.scheduleMeeting(payload);
 
@@ -438,37 +568,62 @@ export const useScheduleMeeting = ({
             toast.error("Meeting saved, but custom fields failed to save");
           }
         }
+
+        if (
+          selectedResources &&
+          selectedResources.length > 0 &&
+          userData?.organization
+        ) {
+          const orgId = userData.organization._id || userData.organization;
+          const slot = buildScheduleSlot(
+            scheduleData.date,
+            scheduleData.time,
+            scheduleData.duration,
+          );
+          if (slot) {
+            for (const resourceId of selectedResources) {
+              try {
+                await resourceBookingApi.createBooking(orgId, {
+                  resourceId,
+                  meetingId: response.data.meeting._id,
+                  startTime: slot.start.toISOString(),
+                  endTime: slot.end.toISOString(),
+                });
+              } catch (err) {
+                console.error("Failed to book resource", err);
+                toast.error(
+                  `Failed to book a selected physical resource: ${err.response?.data?.message || err.message}`,
+                );
+              }
+            }
+          }
+        }
+
+        if (attachments.length > 0 && response.data.meeting?._id) {
+          for (const file of attachments) {
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+              await attachmentApi.uploadAttachment(
+                response.data.meeting._id,
+                formData,
+              );
+            } catch (err) {
+              console.error("Failed to upload attachment", err);
+              toast.error(
+                `Meeting saved, but failed to upload ${file.name || "attachment"}`,
+              );
+            }
+          }
+        }
+
         toast.success("✅ Meeting scheduled and synced to calendars!");
 
         if (response.data.calendarLinks) {
           toast.info("📅 Calendar invites sent to all participants!");
         }
 
-        setScheduleData({
-          title: "",
-          description: "",
-          meetingType: "conference",
-          date: "",
-          time: "",
-          duration: "",
-          location: "",
-          venue: "",
-          syncToCalendar: true,
-          reminderEnabled: false,
-          reminderMinutesBefore: 30,
-        });
-        setParticipants([]);
-        setAgendaItems([]);
-        setAttachments([]);
-        setDuplicateMetadata({
-          tags: [],
-          policyDetails: null,
-          recordingType: "upload",
-        });
-        setSelectedTemplateId("");
-        setFocusConflicts([]);
-        setBusyParticipants([]);
-        clearDraft();
+        resetScheduleForm();
       } else {
         toast.error(response.data?.message || "Failed to schedule meeting");
       }
@@ -524,5 +679,7 @@ export const useScheduleMeeting = ({
     conflictCheckError,
     conflictMode,
     setConflictMode,
+    selectedResources,
+    setSelectedResources,
   };
 };

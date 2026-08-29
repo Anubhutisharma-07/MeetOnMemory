@@ -25,6 +25,11 @@ const VITEST_TEST_FILES = new Set([
   "server/tests/MeetingService.test.js",
   "server/tests/realtimeClerkAuthPhase4.test.js",
   "server/tests/sharedLinkAnalytics.test.js",
+  "server/tests/meetingValidation.test.js",
+  "server/tests/e2eeFeatureFlag.test.js",
+  "server/tests/sessionController.test.js",
+  "server/tests/meetingROIController.test.js",
+  "server/tests/aiMeetingNoteController.test.js",
 ]);
 const JEST_RELATED_IGNORE = [
   "tests/integration.test.js",
@@ -50,7 +55,16 @@ const vitestOwnedSources = new Set([
   "server/controllers/organizationController.js",
   "server/controllers/knowledgeController.js",
   "server/controllers/transcriptController.js",
+  "server/models/transcriptModel.js",
+  "server/routes/transcriptRoutes.js",
+  "server/routes/meetingRoutes.js",
+  "server/models/meetingModel.js",
+  "server/middleware/meetingValidation.js",
+  "server/controllers/meetingSeriesController.js",
   "server/controllers/meetingController.js",
+  "server/controllers/sessionController.js",
+  "server/models/sessionCardModel.js",
+  "server/routes/sessionRoutes.js",
   "server/controllers/sharedLinkController.js",
   "server/models/sharedLinkModel.js",
   "server/config/express.js",
@@ -58,8 +72,48 @@ const vitestOwnedSources = new Set([
   "server/services/MeetingService.js",
   "server/services/MeetingStorageService.js",
   "server/utils/imageUrl.js",
+  "server/models/organizationModel.js",
+  "server/utils/transcriptEncryption.js",
+  "server/controllers/meetingROIController.js",
+  "server/models/meetingROIModel.js",
+  "server/routes/meetingROIRoutes.js",
+  "server/controllers/aiMeetingNoteController.js",
+  "server/models/aiMeetingNoteModel.js",
+  "server/routes/aiMeetingNoteRoutes.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
+  "server/models/organizationModel.js":
+    "server/tests/OrganizationService.test.js",
+  "server/utils/transcriptEncryption.js":
+    "server/tests/e2eeFeatureFlag.test.js",
+  "server/controllers/meetingROIController.js":
+    "server/tests/meetingROIController.test.js",
+  "server/models/meetingROIModel.js":
+    "server/tests/meetingROIController.test.js",
+  "server/routes/meetingROIRoutes.js":
+    "server/tests/meetingROIController.test.js",
+  "server/controllers/aiMeetingNoteController.js":
+    "server/tests/aiMeetingNoteController.test.js",
+  "server/models/aiMeetingNoteModel.js":
+    "server/tests/aiMeetingNoteController.test.js",
+  "server/routes/aiMeetingNoteRoutes.js":
+    "server/tests/aiMeetingNoteController.test.js",
+  "server/controllers/transcriptController.js":
+    "server/tests/transcriptController.test.js",
+  "server/models/transcriptModel.js":
+    "server/tests/transcriptController.test.js",
+  "server/routes/transcriptRoutes.js":
+    "server/tests/transcriptController.test.js",
+  "server/routes/meetingRoutes.js": "server/tests/transcriptController.test.js",
+  "server/models/meetingModel.js": "server/tests/meetingValidation.test.js",
+  "server/middleware/meetingValidation.js":
+    "server/tests/meetingValidation.test.js",
+  "server/controllers/meetingSeriesController.js":
+    "server/tests/meetingValidation.test.js",
+  "server/controllers/sessionController.js":
+    "server/tests/sessionController.test.js",
+  "server/models/sessionCardModel.js": "server/tests/sessionController.test.js",
+  "server/routes/sessionRoutes.js": "server/tests/sessionController.test.js",
   "server/controllers/meetingController.js":
     "server/tests/MeetingService.test.js",
   "server/services/MeetingService.js": "server/tests/MeetingService.test.js",
@@ -71,8 +125,13 @@ const VITEST_SOURCE_TEST_MAP = {
     "server/tests/sharedLinkAnalytics.test.js",
   "server/config/express.js": "server/tests/sharedLinkAnalytics.test.js",
 };
+// Suites named `*.vitest.test.js` are Vitest-owned by convention and need no
+// entry in VITEST_TEST_FILES above (Issue #2575).
+const isVitestSuite = (file) =>
+  VITEST_TEST_FILES.has(file) || file.endsWith(".vitest.test.js");
+
 const vitestTests = [
-  ...directTests.filter((file) => VITEST_TEST_FILES.has(file)),
+  ...directTests.filter(isVitestSuite),
   ...sourceFiles
     .filter((file) => vitestOwnedSources.has(file))
     .map((file) => {
@@ -80,7 +139,7 @@ const vitestTests = [
       const base = file.split("/").pop().replace(/\.js$/, "");
       return `server/tests/${base}.test.js`;
     })
-    .filter((file) => VITEST_TEST_FILES.has(file)),
+    .filter(isVitestSuite),
 ].filter(fileExists);
 const uniqueVitestTests = [...new Set(vitestTests)];
 // Skip deleted legacy test files still present in the diff against main.

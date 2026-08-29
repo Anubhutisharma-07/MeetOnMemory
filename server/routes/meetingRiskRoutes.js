@@ -1,18 +1,31 @@
-const express = require("express");
+import express from "express";
+import protect from "../middleware/userAuth.js";
+import {
+  createRisk,
+  getRisksByOrganization,
+  getRisksByMeeting,
+  updateRisk,
+  deleteRisk,
+  linkActionItem,
+  exportOrganizationRisks,
+  updateRiskStatus,
+  mitigateRisk,
+  getRiskDashboard,
+} from "../controllers/meetingRiskController.js";
+
 const router = express.Router();
-const { protect } = require("../middleware/authMiddleware");
-const meetingRiskController = require("../controllers/meetingRiskController");
 
 router.use(protect);
 
-router.post("/", meetingRiskController.createRisk);
-router.get(
-  "/organization/:organizationId",
-  meetingRiskController.getRisksByOrganization,
-);
-router.get("/meeting/:meetingId", meetingRiskController.getRisksByMeeting);
-router.put("/:riskId", meetingRiskController.updateRisk);
-router.delete("/:riskId", meetingRiskController.deleteRisk);
-router.post("/:riskId/action-items", meetingRiskController.linkActionItem);
+router.post("/", createRisk);
+router.get("/dashboard", getRiskDashboard);
+router.get("/organization/:organizationId/export", exportOrganizationRisks);
+router.get("/organization/:organizationId", getRisksByOrganization);
+router.get("/meeting/:meetingId", getRisksByMeeting);
+router.patch("/:riskId/status", updateRiskStatus);
+router.put("/:riskId/mitigate", mitigateRisk);
+router.put("/:riskId", updateRisk);
+router.delete("/:riskId", deleteRisk);
+router.post("/:riskId/action-items", linkActionItem);
 
-module.exports = router;
+export default router;

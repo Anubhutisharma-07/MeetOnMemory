@@ -19,6 +19,7 @@ import {
   getMemoryLifecycleRetentionPolicy,
   updateMemoryLifecycleRetentionPolicy,
 } from "../controllers/memoryLifecycleRetentionController.js";
+import { getEnterpriseMemoryTelemetryController } from "../controllers/memoryAnalyticsTelemetryController.js";
 import {
   getArchivedMemoriesWithFacets,
   bulkRestoreArchivedMemories,
@@ -32,6 +33,8 @@ import {
   getConflicts,
   getConflictDetail,
   resolveConflict,
+  getConflictAuditHistory,
+  bulkResolveConflicts,
 } from "../controllers/conflictController.js";
 import {
   getSnapshots,
@@ -139,6 +142,14 @@ router.post(
   recalculateImportance,
 );
 
+// --- Enterprise Memory Analytics Telemetry ---
+router.get(
+  "/analytics/telemetry",
+  requireOrgMembership,
+  requirePermission("knowledge", "view"),
+  getEnterpriseMemoryTelemetryController,
+);
+
 // --- Memory Lifecycle Management ---
 router.get(
   "/lifecycle",
@@ -209,6 +220,19 @@ router.get(
   requireOrgMembership,
   requirePermission("knowledge", "view"),
   getConflicts,
+);
+router.get(
+  "/conflicts/audit-history",
+  requireOrgMembership,
+  requirePermission("knowledge", "view"),
+  getConflictAuditHistory,
+);
+router.post(
+  "/conflicts/bulk-resolve",
+  writeLimiter,
+  requireOrgMembership,
+  requirePermission("knowledge", "resolve_conflicts"),
+  bulkResolveConflicts,
 );
 router.get(
   "/conflicts/:id",

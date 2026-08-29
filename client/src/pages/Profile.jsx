@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar.jsx";
 import { toast } from "react-toastify";
 import { userApi } from "../services";
 import AppContent from "../context/AppContent";
+import { useSkillEndorsements } from "../hooks/useSkillEndorsements";
 import {
   User,
   Mail,
@@ -18,6 +19,7 @@ import {
   Loader2,
   ShieldCheck,
   Globe,
+  Upload,
 } from "lucide-react";
 
 const Profile = () => {
@@ -27,6 +29,10 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
   const [profilePicFailed, setProfilePicFailed] = useState(false);
   const [gamificationData, setGamificationData] = useState(null);
+
+  const [endorsements, setEndorsements] = useState([]);
+  const { getUserEndorsements, loading: endorsementsLoading } =
+    useSkillEndorsements();
 
   useEffect(() => {
     setProfilePicFailed(false);
@@ -47,10 +53,21 @@ const Profile = () => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    if (userData?._id || userData?.id) {
+      const id = userData._id || userData.id;
+      getUserEndorsements(id).then((data) => setEndorsements(data || []));
+    }
+  }, [userData, getUserEndorsements]);
+
   // Form State
   const [name, setName] = useState("");
   const [profilePic, setProfilePic] = useState("");
   const [bio, setBio] = useState("");
+
+  // File Upload State
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
 
   // Validation States
   const [errors, setErrors] = useState({
@@ -63,7 +80,9 @@ const Profile = () => {
     if (userData) {
       setName(userData.name || "");
       setProfilePic(userData.profilePic || "");
+      setPreviewUrl(userData.profilePic || "");
       setBio(userData.bio || "");
+      setSelectedFile(null);
     }
   }, [userData]);
 
@@ -121,6 +140,30 @@ const Profile = () => {
     return isValid;
   };
 
+  // Handle local avatar file picker
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size exceeds 5MB limit");
+        return;
+      }
+      const allowedTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/gif",
+        "image/webp",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error("Only images (JPEG, PNG, GIF, WebP) are allowed");
+        return;
+      }
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+      setProfilePic(""); // clear URL fallback when file uploader is active
+    }
+  };
+
   // Save changes handler
   const handleSave = async (e) => {
     e.preventDefault();
@@ -128,9 +171,26 @@ const Profile = () => {
 
     setLoading(true);
     try {
+      let finalProfilePic = profilePic.trim();
+
+      // Upload local file first if chosen
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("avatar", selectedFile);
+
+        const uploadRes = await userApi.uploadAvatar(formData);
+        if (uploadRes.data?.success) {
+          finalProfilePic = uploadRes.data.profilePic;
+        } else {
+          toast.error(uploadRes.data?.message || "Avatar upload failed");
+          setLoading(false);
+          return;
+        }
+      }
+
       const { data } = await userApi.updateProfile({
         name: name.trim(),
-        profilePic: profilePic.trim(),
+        profilePic: finalProfilePic,
         bio: bio.trim(),
       });
 
@@ -139,6 +199,7 @@ const Profile = () => {
         setUserData(data.user);
         localStorage.setItem("userData", JSON.stringify(data.user));
         setIsEditing(false);
+        setSelectedFile(null);
       } else {
         toast.error(data.message || t("profile.profileUpdateFailed"));
       }
@@ -156,8 +217,10 @@ const Profile = () => {
   const handleCancel = () => {
     setName(userData.name || "");
     setProfilePic(userData.profilePic || "");
+    setPreviewUrl(userData.profilePic || "");
     setBio(userData.bio || "");
     setErrors({ name: "", profilePic: "" });
+    setSelectedFile(null);
     setIsEditing(false);
   };
 
@@ -187,7 +250,7 @@ const Profile = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
             {t("profile.title")}
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-sm max-w-md mx-auto">
+          <p className="text-slate-550 dark:text-slate-400 mt-2 text-sm max-w-md mx-auto">
             {t("profile.description")}
           </p>
         </div>
@@ -298,7 +361,7 @@ const Profile = () => {
                 <div className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
                   {t("profile.bio")}
                 </div>
-                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed italic">
+                <p className="text-sm text-slate-650 dark:text-slate-400 leading-relaxed italic">
                   {userData.bio || t("profile.noBio")}
                 </p>
               </div>
@@ -358,6 +421,61 @@ const Profile = () => {
                   )}
                 </div>
               )}
+
+              {/* Endorsements Section */}
+              <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                    {t("profile.endorsements") || "Peer Endorsements"}
+                  </div>
+                </div>
+
+                {endorsementsLoading ? (
+                  <div className="flex items-center justify-center p-4">
+                    <Loader2 className="animate-spin w-5 h-5 text-blue-500" />
+                  </div>
+                ) : endorsements.length > 0 ? (
+                  <div className="space-y-4 mt-2">
+                    {endorsements.map((skill, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-700/50"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-bold text-slate-800 dark:text-slate-200">
+                            {skill.skillTag}
+                          </h4>
+                          <span className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs font-semibold px-2.5 py-0.5 rounded-full">
+                            {skill.count} endorsements
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {skill.endorsements.map((end, eIdx) => (
+                            <div
+                              key={eIdx}
+                              className="text-sm text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700"
+                            >
+                              {end.comment && (
+                                <p className="italic mb-1">"{end.comment}"</p>
+                              )}
+                              <Link
+                                to={`/meeting/${end.meetingId}`}
+                                className="text-xs text-blue-500 hover:underline"
+                              >
+                                View Meeting ↗
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    No endorsements yet.
+                  </p>
+                )}
+              </div>
             </div>
           ) : (
             // ================= EDIT STATE =================
@@ -408,13 +526,51 @@ const Profile = () => {
                   )}
                 </div>
 
-                {/* Profile Picture URL input */}
+                {/* Profile Picture Upload & Preview */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Avatar Image Upload
+                  </label>
+                  <div className="flex flex-col sm:flex-row gap-4 items-center bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="Avatar preview"
+                        className="w-16 h-16 rounded-full object-cover border border-slate-250 shadow-xs"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-linear-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-xl border">
+                        {getInitials(name)}
+                      </div>
+                    )}
+
+                    <div className="flex-grow space-y-1.5 w-full">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        disabled={loading}
+                        className="text-xs text-slate-650 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-slate-700 dark:file:text-slate-200 cursor-pointer"
+                        data-testid="avatar-file-input"
+                      />
+                      <p className="text-[10px] text-slate-400 font-medium">
+                        Allowed formats: JPG, PNG, GIF, WebP. Max size: 5MB.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center text-xs text-slate-400 font-bold uppercase tracking-wider py-1">
+                  — OR —
+                </div>
+
+                {/* Profile Picture URL input (Fallback) */}
                 <div className="space-y-2">
                   <label
                     htmlFor="pic-input"
                     className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider"
                   >
-                    {t("profile.profilePictureUrl")}
+                    Image URL (Fallback)
                   </label>
                   <div className="relative">
                     <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -422,7 +578,11 @@ const Profile = () => {
                       id="pic-input"
                       type="text"
                       value={profilePic}
-                      onChange={(e) => setProfilePic(e.target.value)}
+                      onChange={(e) => {
+                        setProfilePic(e.target.value);
+                        setPreviewUrl(e.target.value);
+                        setSelectedFile(null); // Clear selected file if user inputs URL manually
+                      }}
                       placeholder={t("profile.profilePicturePlaceholder")}
                       disabled={loading}
                       className={`w-full bg-slate-50/50 dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border ${

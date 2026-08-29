@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import PDFDocument from "pdfkit";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import PolicyCompliance from "../models/policyComplianceModel.js";
 import Policy from "../models/policyModel.js";
 import Decision from "../models/decisionModel.js";
@@ -8,6 +8,13 @@ import Meeting from "../models/meetingModel.js";
 import { sendError } from "../utils/responseHandler.js";
 
 const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// archiver v8 is ESM-only and exports classes rather than a callable factory
+// (Issue #2575). Reaching it through `createRequire` threw
+// `ERR_REQUIRE_CYCLE_MODULE` once this controller was loaded as part of the
+// full router graph, and `archiver("zip", ...)` would not have worked against
+// v8 in any case — `^8.0.0` has been the declared dependency since the
+// upgrade, so this call site was left on the v6 API.
 
 const toPlain = (value) =>
   value && typeof value.toObject === "function" ? value.toObject() : value;
@@ -154,7 +161,7 @@ const renderPdf = (evidence) =>
 
 const renderZip = async (evidence, pdf) => {
   const chunks = [];
-  const archive = archiver("zip", { zlib: { level: 9 } });
+  const archive = new ZipArchive({ zlib: { level: 9 } });
 
   return new Promise((resolve, reject) => {
     archive.on("data", (chunk) => chunks.push(chunk));
