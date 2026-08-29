@@ -163,12 +163,10 @@ export const createBooking = async (req, res) => {
         suggestions: error.suggestions || [],
       });
     }
-    return res
-      .status(500)
-      .json({
-        error: "Internal scheduling pipeline exception.",
-        message: error.message,
-      });
+    return res.status(500).json({
+      error: "Internal scheduling pipeline exception.",
+      message: error.message,
+    });
   }
 };
 
