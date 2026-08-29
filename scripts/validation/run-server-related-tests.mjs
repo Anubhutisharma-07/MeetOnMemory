@@ -80,6 +80,7 @@ const vitestOwnedSources = new Set([
   "server/controllers/aiMeetingNoteController.js",
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
+ feature/guest-access-analytics-2454
   "server/controllers/guestAccessController.js",
   "server/routes/guestAccessRoutes.js",
   "server/services/guestAccessService.js",
@@ -107,6 +108,17 @@ const VITEST_SOURCE_TEST_MAP = {
     "server/tests/guestAccessController.vitest.test.js",
   "server/models/GuestToken.js":
     "server/tests/guestAccessController.vitest.test.js",
+
+  "server/controllers/keyMomentController.js",
+  "server/routes/keyMomentRoutes.js",
+  "server/middleware/authMiddleware.js",
+]);
+const VITEST_SOURCE_TEST_MAP = {
+  "server/controllers/keyMomentController.js":
+    "server/tests/keyMomentController.vitest.test.js",
+  "server/routes/keyMomentRoutes.js":
+    "server/tests/keyMomentController.vitest.test.js",
+ main
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/utils/transcriptEncryption.js":
