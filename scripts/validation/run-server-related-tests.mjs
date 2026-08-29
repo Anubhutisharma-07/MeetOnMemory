@@ -81,6 +81,7 @@ const vitestOwnedSources = new Set([
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
  feature/guest-access-analytics-2454
+ feature/guest-access-analytics-2454
   "server/controllers/guestAccessController.js",
   "server/routes/guestAccessRoutes.js",
   "server/services/guestAccessService.js",
@@ -109,16 +110,38 @@ const VITEST_SOURCE_TEST_MAP = {
   "server/models/GuestToken.js":
     "server/tests/guestAccessController.vitest.test.js",
 
+
+  "server/controllers/resourceBookingController.js",
+  "server/routes/resourceBookingRoutes.js",
+  "server/services/resourceBookingService.js",
+  "server/models/resourceBookingModel.js",
+  "server/models/physicalResourceModel.js",
+  "server/middleware/authMiddleware.js",
+  "server/routes/index.js",
+ main
   "server/controllers/keyMomentController.js",
   "server/routes/keyMomentRoutes.js",
-  "server/middleware/authMiddleware.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
+  "server/routes/index.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/controllers/resourceBookingController.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/routes/resourceBookingRoutes.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/services/resourceBookingService.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/models/resourceBookingModel.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/models/physicalResourceModel.js":
+    "server/tests/resourceBookingController.vitest.test.js",
   "server/controllers/keyMomentController.js":
     "server/tests/keyMomentController.vitest.test.js",
   "server/routes/keyMomentRoutes.js":
     "server/tests/keyMomentController.vitest.test.js",
  main
+  "server/models/organizationModel.js":
+    "server/tests/OrganizationService.test.js",
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/utils/transcriptEncryption.js":
