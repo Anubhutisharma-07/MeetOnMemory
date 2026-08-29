@@ -152,6 +152,9 @@ const SeriesRetrospective = lazy(
   () => import("../pages/SeriesRetrospective.jsx"),
 );
 const MeetingSeriesList = lazy(() => import("../pages/MeetingSeriesList.jsx"));
+const MeetingSeriesEvolution = lazy(
+  () => import("../pages/MeetingSeriesEvolution.jsx"),
+);
 const DataRetentionSettings = lazy(
   () => import("../pages/DataRetentionSettings.jsx"),
 );
@@ -297,6 +300,14 @@ const ProtectedRoutes = (
       element={
         <ProtectedRoute resource="meetings" action="view">
           <MeetingSeriesList />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/meeting-series/:id/evolution"
+      element={
+        <ProtectedRoute resource="meetings" action="view">
+          <MeetingSeriesEvolution />
         </ProtectedRoute>
       }
     />
