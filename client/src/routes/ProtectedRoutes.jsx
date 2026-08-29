@@ -74,6 +74,7 @@ import ActionItemAnalytics from "../pages/ActionItemAnalytics.jsx";
 import ActionItemsDashboard from "../pages/ActionItemsDashboard.jsx";
 import WorkloadDashboard from "../pages/WorkloadDashboard.jsx";
 import MyDelegations from "../pages/MyDelegations.jsx";
+import MeetingEnergyPredictor from "../pages/MeetingEnergyPredictor.jsx";
 import MeetingPatterns from "../pages/MeetingPatterns.jsx";
 import FocusTime from "../pages/FocusTime.jsx";
 import SeriesRetrospective from "../pages/SeriesRetrospective.jsx";
