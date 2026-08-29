@@ -80,8 +80,27 @@ const vitestOwnedSources = new Set([
   "server/controllers/aiMeetingNoteController.js",
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
+  "server/controllers/resourceBookingController.js",
+  "server/routes/resourceBookingRoutes.js",
+  "server/services/resourceBookingService.js",
+  "server/models/resourceBookingModel.js",
+  "server/models/physicalResourceModel.js",
+  "server/middleware/authMiddleware.js",
+  "server/routes/index.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
+  "server/routes/index.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/controllers/resourceBookingController.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/routes/resourceBookingRoutes.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/services/resourceBookingService.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/models/resourceBookingModel.js":
+    "server/tests/resourceBookingController.vitest.test.js",
+  "server/models/physicalResourceModel.js":
+    "server/tests/resourceBookingController.vitest.test.js",
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/utils/transcriptEncryption.js":
