@@ -74,6 +74,7 @@ import ActionItemAnalytics from "../pages/ActionItemAnalytics.jsx";
 import ActionItemsDashboard from "../pages/ActionItemsDashboard.jsx";
 import WorkloadDashboard from "../pages/WorkloadDashboard.jsx";
 import MyDelegations from "../pages/MyDelegations.jsx";
+import TranscriptSentimentAnalyzer from "../pages/TranscriptSentimentAnalyzer.jsx";
 import MeetingPatterns from "../pages/MeetingPatterns.jsx";
 import FocusTime from "../pages/FocusTime.jsx";
 import SeriesRetrospective from "../pages/SeriesRetrospective.jsx";
@@ -737,6 +738,14 @@ const ProtectedRoutes = (
       element={
         <ProtectedRoute resource="reports" action="view">
           <MeetingPatterns />
+        </ProtectedRoute>
+      }
+    />
+    <Route
+      path="/sentiment"
+      element={
+        <ProtectedRoute resource="reports" action="view">
+          <TranscriptSentimentAnalyzer />
         </ProtectedRoute>
       }
     />
