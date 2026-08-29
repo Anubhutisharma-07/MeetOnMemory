@@ -179,6 +179,8 @@ router.use("/api/meetings/:meetingId/attachments", attachmentRoutes);
 router.use("/api/icebreakers", icebreakerRoutes);
 router.use("/api/physical-resources", resourceBookingRoutes);
 router.use("/api/meetings", agendaRolloverRoutes);
+router.use("/api/resources", resourceBookingRoutes);
+router.use("/api/bookings", resourceBookingRoutes);
 router.use("/api/meetings/:meetingId/minutes-approval", minutesApprovalRoutes);
 router.use("/api/meeting-series", meetingSeriesRoutes);
 router.use("/api/series-diff", meetingSeriesDiffRoutes);
