@@ -52,6 +52,14 @@ const ROOT_CLIENT_MAP = {
     "client/src/pages/__tests__/AiMeetingNotesDashboard.test.jsx",
   "client/src/services/aiMeetingNoteApi.js":
     "client/src/pages/__tests__/AiMeetingNotesDashboard.test.jsx",
+  "client/src/components/meetings/GuestAccessManager.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/pages/GuestJoin.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/pages/GuestMeetingView.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/services/guestAccessApi.js":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
 };
 
 const directTests = [
