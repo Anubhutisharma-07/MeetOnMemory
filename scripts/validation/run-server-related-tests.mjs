@@ -80,8 +80,15 @@ const vitestOwnedSources = new Set([
   "server/controllers/aiMeetingNoteController.js",
   "server/models/aiMeetingNoteModel.js",
   "server/routes/aiMeetingNoteRoutes.js",
+  "server/controllers/keyMomentController.js",
+  "server/routes/keyMomentRoutes.js",
+  "server/middleware/authMiddleware.js",
 ]);
 const VITEST_SOURCE_TEST_MAP = {
+  "server/controllers/keyMomentController.js":
+    "server/tests/keyMomentController.vitest.test.js",
+  "server/routes/keyMomentRoutes.js":
+    "server/tests/keyMomentController.vitest.test.js",
   "server/models/organizationModel.js":
     "server/tests/OrganizationService.test.js",
   "server/utils/transcriptEncryption.js":
