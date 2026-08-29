@@ -172,6 +172,7 @@ router.use("/api/tags", tagRoutes);
 router.use("/api/polls", pollRoutes);
 router.use("/api/meetings/:meetingId/topics", topicRoutes);
 router.use("/api/meetings/:meetingId/breakout-rooms", breakoutRoomRoutes);
+router.use("/api/breakouts", breakoutRoomRoutes);
 router.use("/api/workload", workloadRoutes);
 router.use("/api/meeting-workload", meetingWorkloadRoutes);
 router.use("/api/meetings/:meetingId/attachments", attachmentRoutes);
