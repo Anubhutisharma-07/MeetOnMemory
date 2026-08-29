@@ -42,6 +42,7 @@ import {
   startActionItemReminderJob,
   stopActionItemReminderJob,
 } from "./jobs/actionItemReminderJob.js";
+import { startMeetingWorkloadJob } from "./jobs/meetingWorkloadJob.js";
 import { startRecapBatchJob, stopRecapBatchJob } from "./jobs/recapBatchJob.js";
 import gamificationEngine from "./services/gamificationEngine.js";
 import { startLeaderboardJob } from "./jobs/leaderboardAggregationJob.js";
@@ -55,6 +56,7 @@ import {
   stopDataRetentionJob,
 } from "./jobs/dataRetentionJob.js";
 import { startEscalationJob, stopEscalationJob } from "./jobs/escalationJob.js";
+import { startNotificationBatchJob } from "./jobs/notificationBatchJob.js";
 import {
   startMeetingNudgeJob,
   stopMeetingNudgeJob,
@@ -71,13 +73,24 @@ import {
   startActionItemSlaJob,
   stopActionItemSlaJob,
 } from "./jobs/actionItemSlaJob.js";
+import { startAbsenteeCatchUpJob } from "./jobs/absenteeCatchUpJob.js";
+import startAsyncMeetingSummaryJob from "./jobs/asyncMeetingSummaryJob.js";
+import scheduleRecurringActionItemJob from "./jobs/recurringActionItemJob.js";
+import {
+  startDecisionReviewReminderJob,
+  stopDecisionReviewReminderJob,
+} from "./jobs/decisionReviewReminderJob.js";
+import {
+  startMeetingOwnershipTransferJob,
+  stopMeetingOwnershipTransferJob,
+} from "./jobs/meetingOwnershipTransferJob.js";
 import { createClient } from "redis"; // eslint-disable-line no-unused-vars
 import {
   initDataExportWorker, // eslint-disable-line no-unused-vars
   initConflictScanWorker, // eslint-disable-line no-unused-vars
   shutdownQueues,
 } from "./services/queueService.js";
-import { initWebhookWorker } from "./services/webhookDispatcherService.js"; // eslint-disable-line no-unused-vars
+import { initMembershipRequestExpirationJob } from "./jobs/membershipRequestExpirationJob.js";
 import reminderScheduler from "./services/reminderScheduler.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -167,6 +180,9 @@ if (process.env.NODE_ENV !== "test") {
   // Start poll expiration background job
   startPollExpirationJob(io);
 
+  // Start membership request auto-expiration background job (#2483)
+  initMembershipRequestExpirationJob(io);
+
   // Start follow-up reminder background job
   startFollowUpReminderJob();
 
@@ -175,6 +191,7 @@ if (process.env.NODE_ENV !== "test") {
 
   // Start action-item reminder job (Issue #1397)
   startActionItemReminderJob();
+  startMeetingWorkloadJob();
 
   // Start meeting pattern detection job
   startMeetingPatternJob();
@@ -193,6 +210,7 @@ if (process.env.NODE_ENV !== "test") {
 
   // Start automated escalation job
   startEscalationJob();
+  startNotificationBatchJob();
 
   // Start meeting nudge job
   startMeetingNudgeJob();
@@ -205,6 +223,21 @@ if (process.env.NODE_ENV !== "test") {
 
   // Start Action Item SLA background job
   startActionItemSlaJob();
+
+  // Start Absentee Catch-Up background job
+  startAbsenteeCatchUpJob();
+
+  // Start Async Meeting Summary background job
+  startAsyncMeetingSummaryJob();
+
+  // Start Recurring Action Item job
+  scheduleRecurringActionItemJob();
+
+  // Start Decision Review Reminder job
+  startDecisionReviewReminderJob();
+
+  // Start Meeting Ownership Transfer job
+  startMeetingOwnershipTransferJob();
 }
 
 // (AI, Data Export, and Webhook workers are initialized inside server.listen callback)
@@ -223,6 +256,8 @@ const gracefulShutdown = createGracefulShutdown({
     stopWeeklyInsightJob();
     stopStandupReportJob();
     stopActionItemSlaJob();
+    stopDecisionReviewReminderJob();
+    stopMeetingOwnershipTransferJob();
   },
   closeQueues: shutdownQueues,
   closeDatabase: () => mongoose.connection.close(),

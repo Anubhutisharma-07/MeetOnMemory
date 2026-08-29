@@ -31,10 +31,31 @@ const notificationPreferenceSchema = new mongoose.Schema(
       index: true,
     },
 
+    routingPreferences: {
+      slaAlerts: {
+        slack: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+        inApp: { type: Boolean, default: true },
+      },
+      comments: {
+        slack: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+        inApp: { type: Boolean, default: true },
+      },
+      recaps: {
+        slack: { type: Boolean, default: true },
+        email: { type: Boolean, default: true },
+        inApp: { type: Boolean, default: true },
+      },
+    },
+
+    batchThresholdMinutes: {
+      type: Number,
+      default: 5,
+    },
+
     // ── Email channel ────────────────────────────────────────────────────
-    // NOT YET ENFORCED. The email paths (MeetingDigestService,
-    // recapEmailService) do not consult these. Tracked as follow-up work;
-    // documented rather than silently ignored.
+    // Enforced across email delivery paths (MeetingDigestService, recapEmailService, reminderScheduler).
     emailMeetingReminders: {
       type: Boolean,
       default: true,

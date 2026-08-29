@@ -14,11 +14,73 @@ const clientFiles = changedFiles.filter(
     JS_REGEX.test(file) &&
     !file.includes("/__mocks__/"),
 );
-const directTests = clientFiles.filter((file) =>
-  /(\.test\.|\.spec\.|__tests__)/.test(file),
-);
+const ROOT_CLIENT_MAP = {
+  "client/src/App.jsx": "client/src/__tests__/App.test.jsx",
+  "client/src/services/offlineQueue.js":
+    "client/src/services/__tests__/offlineQueue.test.js",
+  "client/src/components/OfflineBanner.jsx":
+    "client/src/components/__tests__/OfflineBanner.test.jsx",
+  "client/src/components/OfflineQueueInspector.jsx":
+    "client/src/components/__tests__/OfflineQueueInspector.test.jsx",
+  "client/src/pages/AcceptInvite.jsx":
+    "client/src/pages/__tests__/AcceptInvite.test.jsx",
+  "client/src/services/index.js":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/services/meetingApi.js":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/services/sessionCardApi.js":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/routes/ProtectedRoutes.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/components/Navbar.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/pages/CreateMeeting.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/pages/CreateMeeting/components/SessionCards/GeneratedSessionCards.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/pages/CreateMeeting/components/SessionCards/SessionCards.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/pages/CreateMeeting/hooks/useSessionCards.js":
+    "client/src/pages/CreateMeeting/hooks/__tests__/useSessionCards.persistence.test.jsx",
+  "client/src/pages/SessionGallery.jsx":
+    "client/src/pages/__tests__/SessionGallery.test.jsx",
+  "client/src/pages/MeetingROIDashboard.jsx":
+    "client/src/pages/__tests__/MeetingROIDashboard.test.jsx",
+  "client/src/services/meetingROIApi.js":
+    "client/src/pages/__tests__/MeetingROIDashboard.test.jsx",
+  "client/src/pages/AiMeetingNotesDashboard.jsx":
+    "client/src/pages/__tests__/AiMeetingNotesDashboard.test.jsx",
+  "client/src/services/aiMeetingNoteApi.js":
+    "client/src/pages/__tests__/AiMeetingNotesDashboard.test.jsx",
+ feature/breakout-rooms-facilitation-2453
+  "client/src/components/meeting-room/BreakoutRoomPanel.jsx":
+    "client/src/components/meeting-room/__tests__/BreakoutRoomPanel.test.jsx",
+  "client/src/components/meetings/BreakoutRoomPanel.jsx":
+    "client/src/components/meeting-room/__tests__/BreakoutRoomPanel.test.jsx",
+  "client/src/services/breakoutRoomApi.js":
+    "client/src/components/meeting-room/__tests__/BreakoutRoomPanel.test.jsx",
+  "client/src/api/breakoutRoomApi.js":
+    "client/src/components/meeting-room/__tests__/BreakoutRoomPanel.test.jsx",
+
+  "client/src/components/meetings/GuestAccessManager.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/pages/GuestJoin.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/pages/GuestMeetingView.jsx":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+  "client/src/services/guestAccessApi.js":
+    "client/src/components/meetings/__tests__/GuestAccessManager.test.jsx",
+ main
+};
+
+const directTests = [
+  ...clientFiles.filter((file) => /(\.test\.|\.spec\.|__tests__)/.test(file)),
+  ...clientFiles
+    .filter((file) => ROOT_CLIENT_MAP[file])
+    .map((file) => ROOT_CLIENT_MAP[file]),
+];
 const relatedSources = clientFiles.filter(
-  (file) => !directTests.includes(file),
+  (file) => !directTests.includes(file) && !ROOT_CLIENT_MAP[file],
 );
 
 logStep(

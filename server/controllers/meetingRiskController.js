@@ -1,8 +1,14 @@
-const MeetingRisk = require("../models/meetingRiskModel");
-const Meeting = require("../models/meetingModel");
-const { calculateRiskScore } = require("../services/riskScoringService");
+import MeetingRisk from "../models/meetingRiskModel.js";
+import Meeting from "../models/meetingModel.js";
+import RiskEscalation from "../models/riskEscalationModel.js";
+import { calculateRiskScore } from "../services/riskScoringService.js";
+import {
+  risksToCsv,
+  isValidRiskTransition,
+  RISK_STATUSES,
+} from "../utils/riskExport.js";
 
-exports.createRisk = async (req, res) => {
+export const createRisk = async (req, res) => {
   try {
     const {
       meetingId,
@@ -45,7 +51,7 @@ exports.createRisk = async (req, res) => {
   }
 };
 
-exports.getRisksByOrganization = async (req, res) => {
+export const getRisksByOrganization = async (req, res) => {
   try {
     const { organizationId } = req.params;
     const risks = await MeetingRisk.find({ organizationId })
@@ -61,7 +67,85 @@ exports.getRisksByOrganization = async (req, res) => {
   }
 };
 
-exports.getRisksByMeeting = async (req, res) => {
+/**
+ * Export an organization's risk register as CSV (default) or JSON.
+ * @route GET /api/meeting-risks/organization/:organizationId/export?format=csv|json
+ */
+export const exportOrganizationRisks = async (req, res) => {
+  try {
+    const { organizationId } = req.params;
+    const format = (req.query.format || "csv").toString().toLowerCase();
+
+    const risks = await MeetingRisk.find({ organizationId })
+      .populate("ownerId", "firstName lastName")
+      .sort("-createdAt")
+      .lean();
+
+    if (format === "json") {
+      res.setHeader("Content-Type", "application/json");
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="risk-register.json"',
+      );
+      return res.status(200).send(JSON.stringify(risks, null, 2));
+    }
+
+    const csv = risksToCsv(risks);
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="risk-register.csv"',
+    );
+    return res.status(200).send(csv);
+  } catch (error) {
+    console.error("Error exporting risks:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+/**
+ * Move a risk through its mitigation status workflow (with transition
+ * validation) and optionally (re)assign its owner.
+ * @route PATCH /api/meeting-risks/:riskId/status
+ */
+export const updateRiskStatus = async (req, res) => {
+  try {
+    const { riskId } = req.params;
+    const { status, ownerId } = req.body;
+
+    if (!RISK_STATUSES.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: `status must be one of: ${RISK_STATUSES.join(", ")}`,
+      });
+    }
+
+    const risk = await MeetingRisk.findById(riskId);
+    if (!risk) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Risk not found" });
+    }
+
+    if (!isValidRiskTransition(risk.status, status)) {
+      return res.status(400).json({
+        success: false,
+        message: `Cannot move a risk from "${risk.status}" to "${status}"`,
+      });
+    }
+
+    risk.status = status;
+    if (ownerId !== undefined) risk.ownerId = ownerId;
+    await risk.save();
+
+    res.status(200).json({ success: true, data: risk });
+  } catch (error) {
+    console.error("Error updating risk status:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const getRisksByMeeting = async (req, res) => {
   try {
     const { meetingId } = req.params;
     const risks = await MeetingRisk.find({ meetingId })
@@ -76,7 +160,7 @@ exports.getRisksByMeeting = async (req, res) => {
   }
 };
 
-exports.updateRisk = async (req, res) => {
+export const updateRisk = async (req, res) => {
   try {
     const { riskId } = req.params;
     const {
@@ -119,7 +203,7 @@ exports.updateRisk = async (req, res) => {
   }
 };
 
-exports.deleteRisk = async (req, res) => {
+export const deleteRisk = async (req, res) => {
   try {
     const { riskId } = req.params;
     const risk = await MeetingRisk.findByIdAndDelete(riskId);
@@ -135,7 +219,7 @@ exports.deleteRisk = async (req, res) => {
   }
 };
 
-exports.linkActionItem = async (req, res) => {
+export const linkActionItem = async (req, res) => {
   try {
     const { riskId } = req.params;
     const { actionItemId } = req.body;
@@ -158,6 +242,73 @@ exports.linkActionItem = async (req, res) => {
     res.status(200).json({ success: true, data: updatedRisk });
   } catch (error) {
     console.error("Error linking action item:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const mitigateRisk = async (req, res) => {
+  try {
+    const { riskId } = req.params;
+    const { mitigationPlan, ownerId } = req.body;
+
+    if (!mitigationPlan) {
+      return res.status(400).json({
+        success: false,
+        message: "Mitigation plan is required",
+      });
+    }
+
+    const risk = await MeetingRisk.findById(riskId);
+    if (!risk) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Risk not found" });
+    }
+
+    risk.mitigationPlan = mitigationPlan;
+    if (ownerId) risk.ownerId = ownerId;
+    risk.status = "Mitigated";
+
+    await risk.save();
+
+    res.status(200).json({ success: true, data: risk });
+  } catch (error) {
+    console.error("Error mitigating risk:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+export const getRiskDashboard = async (req, res) => {
+  try {
+    const orgId = req.user.organization;
+    if (!orgId) {
+      return res.status(400).json({
+        success: false,
+        message: "User is not part of an organization.",
+      });
+    }
+
+    const risks = await MeetingRisk.find({ organizationId: orgId })
+      .populate("meetingId", "title date")
+      .populate("ownerId", "firstName lastName avatar name email")
+      .sort({ riskScore: -1, createdAt: -1 });
+
+    const escalations = await RiskEscalation.find({ organizationId: orgId })
+      .populate({
+        path: "riskId",
+        select: "title riskScore status",
+      })
+      .sort("-escalatedAt");
+
+    res.status(200).json({
+      success: true,
+      data: {
+        risks,
+        escalations,
+      },
+    });
+  } catch (error) {
+    console.error("Error loading risk dashboard:", error);
     res.status(500).json({ success: false, message: "Server error" });
   }
 };

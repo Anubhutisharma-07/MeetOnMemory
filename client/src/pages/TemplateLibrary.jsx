@@ -7,6 +7,7 @@ import {
 } from "../services/templateLibraryApi";
 import { CopyPlus, Star, ChevronDown, Filter, X } from "lucide-react";
 import { toast } from "react-toastify";
+import CloneMeetingModal from "../components/CloneMeetingModal";
 
 const TemplateLibrary = () => {
   const [templates, setTemplates] = useState([]);
@@ -19,6 +20,7 @@ const TemplateLibrary = () => {
   const [reviewInput, setReviewInput] = useState("");
   const [cloningTemplateId, setCloningTemplateId] = useState(null);
   const [ratingTemplateId, setRatingTemplateId] = useState(null);
+  const [isInstantiateModalOpen, setIsInstantiateModalOpen] = useState(false);
 
   const fetchTemplates = async () => {
     setLoading(true);
@@ -130,13 +132,17 @@ const TemplateLibrary = () => {
           </div>
         </div>
 
-        {error && <div className="text-red-500 mb-4">{error}</div>}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/60 rounded-xl text-red-700 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
         {loading ? (
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
           </div>
-        ) : (
+        ) : error ? null : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {templates.map((template) => (
               <div
@@ -187,10 +193,10 @@ const TemplateLibrary = () => {
           </div>
         )}
 
-        {templates.length === 0 && !loading && (
-          <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">
-              No templates found.
+        {templates.length === 0 && !loading && !error && (
+          <div className="text-center py-12 bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700 rounded-xl p-8 shadow-xs">
+            <p className="text-gray-500 dark:text-gray-400 font-medium">
+              No templates found in the library.
             </p>
           </div>
         )}
@@ -240,12 +246,18 @@ const TemplateLibrary = () => {
                 onClick={() => handleClone(selectedTemplate._id)}
                 disabled={cloningTemplateId === selectedTemplate._id}
                 aria-busy={cloningTemplateId === selectedTemplate._id}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center cursor-pointer"
+                className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed text-gray-800 dark:text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center cursor-pointer"
               >
                 <CopyPlus className="w-5 h-5 mr-2" />
                 {cloningTemplateId === selectedTemplate._id
                   ? "Cloning..."
                   : "Clone Template"}
+              </button>
+              <button
+                onClick={() => setIsInstantiateModalOpen(true)}
+                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition flex items-center justify-center cursor-pointer"
+              >
+                Use This Template
               </button>
             </div>
 
@@ -307,6 +319,14 @@ const TemplateLibrary = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {selectedTemplate && (
+        <CloneMeetingModal
+          isOpen={isInstantiateModalOpen}
+          onClose={() => setIsInstantiateModalOpen(false)}
+          templateId={selectedTemplate._id}
+        />
       )}
     </div>
   );

@@ -3,6 +3,7 @@ import ActionItemSlaConfig from "../models/actionItemSlaConfigModel.js";
 import ActionItemSlaBreach from "../models/actionItemSlaBreachModel.js";
 import mongoose from "mongoose";
 import eventBus from "./eventBus.js";
+import { createNotification } from "./notificationService.js";
 
 class ActionItemSlaService {
   /**
@@ -43,7 +44,7 @@ class ActionItemSlaService {
     return await ActionItemSlaBreach.find(query)
       .populate(
         "actionItem",
-        "text status priority dueDate createdAt resolvedAt",
+        "text status priority dueDate createdAt resolvedAt sourceMeetingId",
       )
       .populate("assignee", "name email")
       .populate("acknowledgedBy", "name email")
@@ -84,6 +85,78 @@ class ActionItemSlaService {
     for (const item of actionItems) {
       const targets = config.targets[item.priority] || config.targets.medium;
 
+      // Skip active alerting if snoozed
+      if (item.snoozedUntil && now < item.snoozedUntil) {
+        continue;
+      }
+
+      const isResolved = ["resolved", "completed"].includes(item.status);
+
+      // Check custom warning offsets before breach
+      if (item.customWarningOffsets && item.customWarningOffsets.length > 0) {
+        const responseBreachTime = new Date(
+          item.createdAt.getTime() +
+            targets.targetResponseHours * 60 * 60 * 1000,
+        );
+        const resolutionBreachTime = new Date(
+          item.createdAt.getTime() +
+            targets.targetResolutionHours * 60 * 60 * 1000,
+        );
+
+        for (const offset of item.customWarningOffsets) {
+          const warningTimeResponse = new Date(
+            responseBreachTime.getTime() - offset * 60 * 1000,
+          );
+          const warningTimeResolution = new Date(
+            resolutionBreachTime.getTime() - offset * 60 * 1000,
+          );
+
+          // Response Warning
+          if (
+            item.status === "open" &&
+            now >= warningTimeResponse &&
+            now < responseBreachTime &&
+            !item.warningsSent.includes(offset)
+          ) {
+            if (item.assignee) {
+              await createNotification(
+                item.assignee,
+                "SLA Response Warning Alert",
+                `The task "${item.text}" is approaching its Response SLA limit (${targets.targetResponseHours}h).`,
+                "tasks",
+                `/followup/tasks/${item._id}`,
+                "View Task",
+                { actionItemId: item._id },
+              );
+            }
+            item.warningsSent.push(offset);
+            await item.save();
+          }
+
+          // Resolution Warning
+          if (
+            !isResolved &&
+            now >= warningTimeResolution &&
+            now < resolutionBreachTime &&
+            !item.warningsSent.includes(offset)
+          ) {
+            if (item.assignee) {
+              await createNotification(
+                item.assignee,
+                "SLA Resolution Warning Alert",
+                `The task "${item.text}" is approaching its Resolution SLA limit (${targets.targetResolutionHours}h).`,
+                "tasks",
+                `/followup/tasks/${item._id}`,
+                "View Task",
+                { actionItemId: item._id },
+              );
+            }
+            item.warningsSent.push(offset);
+            await item.save();
+          }
+        }
+      }
+
       // Calculate actual hours since creation
       const hoursSinceCreation = (now - item.createdAt) / (1000 * 60 * 60);
 
@@ -103,7 +176,6 @@ class ActionItemSlaService {
       }
 
       // 2. Check Resolution SLA (Time to move to 'resolved' or 'completed')
-      const isResolved = ["resolved", "completed"].includes(item.status);
       let resolutionHours = hoursSinceCreation;
       if (isResolved && item.resolvedAt) {
         resolutionHours = (item.resolvedAt - item.createdAt) / (1000 * 60 * 60);
@@ -217,6 +289,41 @@ class ActionItemSlaService {
         count: b.count,
       })),
     };
+  }
+
+  /**
+   * Notify breach assignee
+   */
+  async notifyAssignee(breachId) {
+    const breach = await ActionItemSlaBreach.findById(breachId)
+      .populate("actionItem")
+      .populate("assignee");
+
+    if (!breach) {
+      throw new Error("Breach not found");
+    }
+
+    if (!breach.assignee) {
+      throw new Error("No assignee assigned to this task");
+    }
+
+    const title = "SLA Compliance Breach Alert";
+    const description = `The task "${breach.actionItem.text}" has breached its SLA of ${breach.targetHours} hours (actual: ${Math.round(breach.actualHours)} hours).`;
+    const category = "tasks";
+    const actionUrl = `/followup/tasks/${breach.actionItem._id}`;
+    const actionLabel = "View Task";
+
+    await createNotification(
+      breach.assignee._id || breach.assignee,
+      title,
+      description,
+      category,
+      actionUrl,
+      actionLabel,
+      { breachId: breach._id, actionItemId: breach.actionItem._id },
+    );
+
+    return breach;
   }
 }
 

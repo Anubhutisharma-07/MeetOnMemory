@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Navbar from "../components/Navbar.jsx";
 import ConfirmModal from "../components/ConfirmModal.jsx";
+import ConvertToAsyncModal from "../components/meetings/ConvertToAsyncModal.jsx";
 import { meetingSeriesApi } from "../services/meetingSeriesApi.js";
 import { useRBAC } from "../hooks/useRBAC.js";
 
@@ -34,6 +35,8 @@ const MeetingSeriesList = () => {
   const [loadingOccurrences, setLoadingOccurrences] = useState({});
   const [confirmAction, setConfirmAction] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [isConvertToAsyncOpen, setIsConvertToAsyncOpen] = useState(false);
+  const [selectedSeriesForAsync, setSelectedSeriesForAsync] = useState(null);
 
   const fetchSeries = useCallback(async () => {
     setLoading(true);
@@ -228,6 +231,12 @@ const MeetingSeriesList = () => {
 
                     <div className="flex flex-wrap gap-2">
                       <Link
+                        to={`/meeting-series/${item._id}/evolution`}
+                        className="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-300"
+                      >
+                        Evolution
+                      </Link>
+                      <Link
                         to={`/meeting-series/${item._id}/retrospective`}
                         className="rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-300"
                       >
@@ -248,6 +257,16 @@ const MeetingSeriesList = () => {
                       {canEdit &&
                         (active ? (
                           <>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedSeriesForAsync(item);
+                                setIsConvertToAsyncOpen(true);
+                              }}
+                              className="inline-flex items-center gap-1 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                            >
+                              Convert to Async
+                            </button>
                             <button
                               type="button"
                               onClick={() =>
@@ -354,6 +373,16 @@ const MeetingSeriesList = () => {
           confirmAction ? confirmCopy[confirmAction.type].variant : "danger"
         }
         isLoading={actionLoading}
+      />
+
+      <ConvertToAsyncModal
+        isOpen={isConvertToAsyncOpen}
+        onClose={() => {
+          setIsConvertToAsyncOpen(false);
+          setSelectedSeriesForAsync(null);
+        }}
+        meeting={selectedSeriesForAsync}
+        isSeries={true}
       />
     </div>
   );

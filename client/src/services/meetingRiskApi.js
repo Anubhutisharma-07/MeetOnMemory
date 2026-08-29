@@ -35,6 +35,35 @@ const meetingRiskApi = {
     );
     return response.data;
   },
+
+  updateRiskStatus: async (riskId, data) => {
+    const response = await api.patch(
+      `/api/meeting-risks/${riskId}/status`,
+      data,
+    );
+    return response.data;
+  },
+
+  exportRisks: async (organizationId, format = "csv") => {
+    const response = await api.get(
+      `/api/meeting-risks/organization/${organizationId}/export`,
+      { params: { format }, responseType: "blob" },
+    );
+    return response.data;
+  },
+
+  mitigateRisk: async (riskId, data) => {
+    const response = await api.put(
+      `/api/meeting-risks/${riskId}/mitigate`,
+      data,
+    );
+    return response.data;
+  },
+
+  getRiskDashboard: async () => {
+    const response = await api.get("/api/meeting-risks/dashboard");
+    return response.data;
+  },
 };
 
 export default meetingRiskApi;
